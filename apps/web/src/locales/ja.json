@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "search": "検索",
+    "filter": "フィルター",
+    "actions": "操作",
+    "confirm": "確認",
+    "back": "戻る",
+    "next": "次へ",
+    "close": "閉じる",
+    "noData": "データが見つかりません",
+    "yes": "はい",
+    "no": "いいえ",
+    "all": "すべて",
+    "status": "ステータス",
+    "date": "日付",
+    "time": "時間",
+    "notes": "メモ",
+    "description": "説明",
+    "name": "名前",
+    "email": "メール",
+    "phone": "電話",
+    "address": "住所"
+  },
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "patients": "患者",
+    "appointments": "予約",
+    "billing": "請求",
+    "prescriptions": "処方箋",
+    "lab": "検査結果",
+    "messages": "メッセージ",
+    "staff": "スタッフ",
+    "settings": "設定",
+    "reports": "レポート",
+    "auditLog": "監査ログ"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "welcome": "おかえりなさい、{{name}}",
+    "todayAppointments": "本日の予約",
+    "pendingResults": "保留中の結果",
+    "unreadMessages": "未読メッセージ",
+    "revenueToday": "本日の収益",
+    "upcomingAppointments": "今後の予約",
+    "recentPatients": "最近の患者",
+    "quickActions": "クイックアクション"
+  },
+  "patient": {
+    "title": "患者",
+    "newPatient": "新規患者",
+    "searchPatient": "患者を検索...",
+    "medicalRecordNumber": "患者ID",
+    "dateOfBirth": "生年月日",
+    "gender": "性別",
+    "bloodType": "血液型",
+    "insurance": "保険",
+    "emergencyContact": "緊急連絡先",
+    "allergies": "アレルギー",
+    "medications": "薬剤",
+    "medicalHistory": "病歴",
+    "timeline": "タイムライン"
+  },
+  "appointment": {
+    "title": "予約",
+    "newAppointment": "新規予約",
+    "schedule": "スケジュール",
+    "checkIn": "チェックイン",
+    "checkOut": "チェックアウト",
+    "noShow": "不参加",
+    "cancel": "予約をキャンセル",
+    "reschedule": "再スケジュール",
+    "duration": "時間",
+    "provider": "医師",
+    "reason": "理由",
+    "status": {
+      "scheduled": "予定",
+      "confirmed": "確認済み",
+      "checkedIn": "チェックイン済み",
+      "inProgress": "進行中",
+      "completed": "完了",
+      "cancelled": "キャンセル",
+      "noShow": "不参加"
+    }
+  },
+  "billing": {
+    "title": "請求",
+    "invoice": "請求書",
+    "claim": "保険請求",
+    "payment": "支払い",
+    "total": "合計",
+    "paid": "支払済",
+    "balance": "残高",
+    "status": "ステータス"
+  },
+  "prescription": {
+    "title": "処方箋",
+    "newPrescription": "新規処方箋",
+    "medication": "薬剤",
+    "dosage": "用量",
+    "frequency": "頻度",
+    "duration": "期間",
+    "refills": "リフィル",
+    "pharmacy": "薬局"
+  },
+  "lab": {
+    "title": "検査結果",
+    "orderLab": "検査を依頼",
+    "testName": "検査名",
+    "result": "結果",
+    "referenceRange": "基準範囲",
+    "status": "ステータス",
+    "abnormal": "異常",
+    "normal": "正常"
+  },
+  "settings": {
+    "title": "設定",
+    "profile": "プロフィール",
+    "notifications": "通知",
+    "security": "セキュリティ",
+    "appearance": "表示",
+    "language": "言語",
+    "theme": {
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム"
+    }
+  },
+  "notification": {
+    "title": "通知",
+    "markAllRead": "すべて既読にする",
+    "noNotifications": "通知はありません",
+    "appointmentReminder": "予約リマインダー",
+    "labResultReady": "検査結果準備完了",
+    "newMessage": "新着メッセージ"
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "actions": "Actions",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "close": "Fermer",
+    "noData": "Aucune donnée trouvée",
+    "yes": "Oui",
+    "no": "Non",
+    "all": "Tout",
+    "status": "Statut",
+    "date": "Date",
+    "time": "Heure",
+    "notes": "Notes",
+    "description": "Description",
+    "name": "Nom",
+    "email": "Courriel",
+    "phone": "Téléphone",
+    "address": "Adresse"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "patients": "Patients",
+    "appointments": "Rendez-vous",
+    "billing": "Facturation",
+    "prescriptions": "Ordonnances",
+    "lab": "Résultats de laboratoire",
+    "messages": "Messages",
+    "staff": "Personnel",
+    "settings": "Paramètres",
+    "reports": "Rapports",
+    "auditLog": "Registre d'audit"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bon retour, {{name}}",
+    "todayAppointments": "Rendez-vous d'aujourd'hui",
+    "pendingResults": "Résultats en attente",
+    "unreadMessages": "Messages non lus",
+    "revenueToday": "Revenus du jour",
+    "upcomingAppointments": "Prochains rendez-vous",
+    "recentPatients": "Patients récents",
+    "quickActions": "Actions rapides"
+  },
+  "patient": {
+    "title": "Patients",
+    "newPatient": "Nouveau patient",
+    "searchPatient": "Rechercher des patients...",
+    "medicalRecordNumber": "N° dossier",
+    "dateOfBirth": "Date de naissance",
+    "gender": "Genre",
+    "bloodType": "Groupe sanguin",
+    "insurance": "Assurance",
+    "emergencyContact": "Contact d'urgence",
+    "allergies": "Allergies",
+    "medications": "Médicaments",
+    "medicalHistory": "Antécédents médicaux",
+    "timeline": "Chronologie"
+  },
+  "appointment": {
+    "title": "Rendez-vous",
+    "newAppointment": "Nouveau rendez-vous",
+    "schedule": "Planifier",
+    "checkIn": "Enregistrer",
+    "checkOut": "Libérer",
+    "noShow": "Absent",
+    "cancel": "Annuler le rendez-vous",
+    "reschedule": "Reprogrammer",
+    "duration": "Durée",
+    "provider": "Médecin",
+    "reason": "Motif",
+    "status": {
+      "scheduled": "Programmé",
+      "confirmed": "Confirmé",
+      "checkedIn": "Enregistré",
+      "inProgress": "En cours",
+      "completed": "Terminé",
+      "cancelled": "Annulé",
+      "noShow": "Absent"
+    }
+  },
+  "billing": {
+    "title": "Facturation",
+    "invoice": "Facture",
+    "claim": "Réclamation",
+    "payment": "Paiement",
+    "total": "Total",
+    "paid": "Payé",
+    "balance": "Solde dû",
+    "status": "Statut"
+  },
+  "prescription": {
+    "title": "Ordonnances",
+    "newPrescription": "Nouvelle ordonnance",
+    "medication": "Médicament",
+    "dosage": "Posologie",
+    "frequency": "Fréquence",
+    "duration": "Durée",
+    "refills": "Renouvellements",
+    "pharmacy": "Pharmacie"
+  },
+  "lab": {
+    "title": "Résultats de laboratoire",
+    "orderLab": "Prescrire un examen",
+    "testName": "Nom de l'examen",
+    "result": "Résultat",
+    "referenceRange": "Valeurs de référence",
+    "status": "Statut",
+    "abnormal": "Anormal",
+    "normal": "Normal"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "profile": "Profil",
+    "notifications": "Notifications",
+    "security": "Sécurité",
+    "appearance": "Apparence",
+    "language": "Langue",
+    "theme": {
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système"
+    }
+  },
+  "notification": {
+    "title": "Notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "noNotifications": "Aucune notification",
+    "appointmentReminder": "Rappel de rendez-vous",
+    "labResultReady": "Résultat de laboratoire prêt",
+    "newMessage": "Nouveau message"
+  }
+}

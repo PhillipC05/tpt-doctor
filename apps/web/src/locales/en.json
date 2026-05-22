@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "noData": "No data found",
+    "yes": "Yes",
+    "no": "No",
+    "all": "All",
+    "status": "Status",
+    "date": "Date",
+    "time": "Time",
+    "notes": "Notes",
+    "description": "Description",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "patients": "Patients",
+    "appointments": "Appointments",
+    "billing": "Billing",
+    "prescriptions": "Prescriptions",
+    "lab": "Lab Results",
+    "messages": "Messages",
+    "staff": "Staff",
+    "settings": "Settings",
+    "reports": "Reports",
+    "auditLog": "Audit Log"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {{name}}",
+    "todayAppointments": "Today's Appointments",
+    "pendingResults": "Pending Results",
+    "unreadMessages": "Unread Messages",
+    "revenueToday": "Today's Revenue",
+    "upcomingAppointments": "Upcoming Appointments",
+    "recentPatients": "Recent Patients",
+    "quickActions": "Quick Actions"
+  },
+  "patient": {
+    "title": "Patients",
+    "newPatient": "New Patient",
+    "searchPatient": "Search patients...",
+    "medicalRecordNumber": "MRN",
+    "dateOfBirth": "Date of Birth",
+    "gender": "Gender",
+    "bloodType": "Blood Type",
+    "insurance": "Insurance",
+    "emergencyContact": "Emergency Contact",
+    "allergies": "Allergies",
+    "medications": "Medications",
+    "medicalHistory": "Medical History",
+    "timeline": "Timeline"
+  },
+  "appointment": {
+    "title": "Appointments",
+    "newAppointment": "New Appointment",
+    "schedule": "Schedule",
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "noShow": "No Show",
+    "cancel": "Cancel Appointment",
+    "reschedule": "Reschedule",
+    "duration": "Duration",
+    "provider": "Provider",
+    "reason": "Reason",
+    "status": {
+      "scheduled": "Scheduled",
+      "confirmed": "Confirmed",
+      "checkedIn": "Checked In",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "noShow": "No Show"
+    }
+  },
+  "billing": {
+    "title": "Billing",
+    "invoice": "Invoice",
+    "claim": "Claim",
+    "payment": "Payment",
+    "total": "Total",
+    "paid": "Paid",
+    "balance": "Balance Due",
+    "status": "Status"
+  },
+  "prescription": {
+    "title": "Prescriptions",
+    "newPrescription": "New Prescription",
+    "medication": "Medication",
+    "dosage": "Dosage",
+    "frequency": "Frequency",
+    "duration": "Duration",
+    "refills": "Refills",
+    "pharmacy": "Pharmacy"
+  },
+  "lab": {
+    "title": "Lab Results",
+    "orderLab": "Order Lab Test",
+    "testName": "Test Name",
+    "result": "Result",
+    "referenceRange": "Reference Range",
+    "status": "Status",
+    "abnormal": "Abnormal",
+    "normal": "Normal"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "notifications": "Notifications",
+    "security": "Security",
+    "appearance": "Appearance",
+    "language": "Language",
+    "theme": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
+  "notification": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications",
+    "appointmentReminder": "Appointment Reminder",
+    "labResultReady": "Lab Result Ready",
+    "newMessage": "New Message"
+  }
+}

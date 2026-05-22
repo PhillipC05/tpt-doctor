@@ -1,0 +1,246 @@
+# ============================================================================
+# TPT Doctor — Ansible Deployment Playbook (On-Premise)
+# Automates the full deployment of TPT Doctor on bare metal / VM
+# ============================================================================
+---
+- name: Deploy TPT Doctor Production Stack
+  hosts: all
+  become: yes
+  vars:
+    # Application
+    app_user: tptdoctor
+    app_group: tptdoctor
+    app_home: /opt/tpt-doctor
+    compose_file: "{{ app_home }}/docker-compose.production.yml"
+    
+    # Docker
+    docker_compose_version: "2.24.0"
+    
+    # Monitoring
+    grafana_admin_password: "{{ vault_grafana_admin_password }}"
+    prometheus_retention_days: 30
+    
+    # Database
+    postgres_password: "{{ vault_postgres_password }}"
+    postgres_db: tpt_doctor
+    postgres_user: tpt_admin
+    
+    # Redis
+    redis_password: "{{ vault_redis_password }}"
+    
+    # Storage
+    minio_access_key: "{{ vault_minio_access_key }}"
+    minio_secret_key: "{{ vault_minio_secret_key }}"
+    
+    # Auth0
+    auth0_domain: "{{ vault_auth0_domain }}"
+    auth0_audience: "{{ vault_auth0_audience }}"
+    auth0_web_client_id: "{{ vault_auth0_web_client_id }}"
+    auth0_portal_client_id: "{{ vault_auth0_portal_client_id }}"
+    
+    # Encryption
+    encryption_master_key: "{{ vault_encryption_master_key }}"
+    
+    # Jitsi
+    jitsi_password: "{{ vault_jitsi_password }}"
+
+  tasks:
+    - name: Create application user
+      user:
+        name: "{{ app_user }}"
+        group: "{{ app_group }}"
+        shell: /bin/bash
+        create_home: yes
+        state: present
+
+    - name: Install system dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - python3-pip
+          - python3-venv
+          - ufw
+          - fail2ban
+          - unattended-upgrades
+          - logrotate
+        state: present
+        update_cache: yes
+
+    - name: Install Docker
+      block:
+        - name: Add Docker GPG key
+          apt_key:
+            url: https://download.docker.com/linux/ubuntu/gpg
+            state: present
+
+        - name: Add Docker repository
+          apt_repository:
+            repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+            state: present
+
+        - name: Install Docker packages
+          apt:
+            name:
+              - docker-ce
+              - docker-ce-cli
+              - containerd.io
+              - docker-compose-plugin
+            state: present
+            update_cache: yes
+
+        - name: Add user to docker group
+          user:
+            name: "{{ app_user }}"
+            groups: docker
+            append: yes
+
+        - name: Enable and start Docker
+          systemd:
+            name: docker
+            enabled: yes
+            state: started
+
+    - name: Configure firewall
+      ufw:
+        rule: "{{ item.rule }}"
+        port: "{{ item.port }}"
+        proto: "{{ item.proto | default('tcp') }}"
+      loop:
+        - { rule: allow, port: 22, proto: tcp }
+        - { rule: allow, port: 80, proto: tcp }
+        - { rule: allow, port: 443, proto: tcp }
+        - { rule: allow, port: 9001, proto: tcp }
+
+    - name: Create application directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: 0755
+      loop:
+        - "{{ app_home }}"
+        - "{{ app_home }}/backup"
+        - "{{ app_home }}/nginx"
+        - "{{ app_home }}/ssl"
+        - "{{ app_home }}/prometheus"
+        - "{{ app_home }}/grafana/dashboards"
+        - "{{ app_home }}/grafana/datasources"
+
+    - name: Copy Docker Compose files
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: 0644
+      loop:
+        - { src: "files/docker-compose.production.yml", dest: "{{ compose_file }}" }
+        - { src: "files/backup/backup.sh", dest: "{{ app_home }}/backup/backup.sh" }
+        - { src: "files/backup/restore.sh", dest: "{{ app_home }}/backup/restore.sh" }
+
+    - name: Copy monitoring configs
+      copy:
+        src: "{{ item }}"
+        dest: "{{ app_home }}/"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: 0644
+      loop:
+        - files/prometheus/prometheus.yml
+        - files/grafana/datasources/prometheus.yml
+        - files/grafana/dashboards/tpt-doctor-dashboard.json
+
+    - name: Copy Nginx configuration
+      template:
+        src: templates/nginx.conf.j2
+        dest: "{{ app_home }}/nginx/nginx.conf"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: 0644
+
+    - name: Set up SSL certificate (self-signed for bootstrap)
+      command: >
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048
+        -keyout {{ app_home }}/ssl/privkey.pem
+        -out {{ app_home }}/ssl/fullchain.pem
+        -subj "/C=AU/ST=NSW/L=Sydney/O=TPT Doctor/CN={{ ansible_fqdn }}"
+      args:
+        creates: "{{ app_home }}/ssl/fullchain.pem"
+
+    - name: Create .env file
+      template:
+        src: templates/env.j2
+        dest: "{{ app_home }}/.env"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: 0600
+
+    - name: Pull Docker images
+      command: docker compose -f {{ compose_file }} pull
+      args:
+        chdir: "{{ app_home }}"
+      register: pull_result
+      changed_when: "'Downloaded' in pull_result.stdout"
+
+    - name: Deploy stack
+      command: docker compose -f {{ compose_file }} up -d
+      args:
+        chdir: "{{ app_home }}"
+      register: deploy_result
+      changed_when: "'Started' in deploy_result.stdout or 'Creating' in deploy_result.stdout"
+
+    - name: Wait for services to be healthy
+      uri:
+        url: "https://{{ ansible_fqdn }}/api/v1/health"
+        validate_certs: no
+        status_code: 200
+      register: health_check
+      retries: 30
+      delay: 10
+      until: health_check.status == 200
+
+    - name: Configure logrotate
+      template:
+        src: templates/logrotate.j2
+        dest: /etc/logrotate.d/tpt-doctor
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Setup backup cron job
+      cron:
+        name: "TPT Doctor DB Backup"
+        minute: "0"
+        hour: "2"
+        job: "docker exec tpt-doctor-backup /usr/local/bin/backup.sh >> /var/log/backup-cron.log 2>&1"
+
+    - name: Verify deployment
+      uri:
+        url: "https://{{ ansible_fqdn }}/api/v1/health"
+        validate_certs: no
+        status_code: 200
+      register: final_health
+      retries: 5
+      delay: 5
+
+    - name: Print deployment summary
+      debug:
+        msg:
+          - "=========================================="
+          - "TPT Doctor Deployment Complete"
+          - "URL: https://{{ ansible_fqdn }}"
+          - "API: https://{{ ansible_fqdn }}/api/v1/health"
+          - "Grafana: https://{{ ansible_fqdn }}:3000"
+          - "MinIO Console: http://{{ ansible_fqdn }}:9001"
+          - "=========================================="
+
+  handlers:
+    - name: restart nginx
+      docker_container:
+        name: tpt-doctor-nginx
+        state: restarted

@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "search": "Pesquisar",
+    "filter": "Filtrar",
+    "actions": "Ações",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "close": "Fechar",
+    "noData": "Nenhum dado encontrado",
+    "yes": "Sim",
+    "no": "Não",
+    "all": "Todos",
+    "status": "Status",
+    "date": "Data",
+    "time": "Hora",
+    "notes": "Anotações",
+    "description": "Descrição",
+    "name": "Nome",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "address": "Endereço"
+  },
+  "nav": {
+    "dashboard": "Painel",
+    "patients": "Pacientes",
+    "appointments": "Consultas",
+    "billing": "Faturamento",
+    "prescriptions": "Receitas",
+    "lab": "Resultados de Laboratório",
+    "messages": "Mensagens",
+    "staff": "Equipe",
+    "settings": "Configurações",
+    "reports": "Relatórios",
+    "auditLog": "Registro de Auditoria"
+  },
+  "dashboard": {
+    "title": "Painel",
+    "welcome": "Bem-vindo de volta, {{name}}",
+    "todayAppointments": "Consultas de Hoje",
+    "pendingResults": "Resultados Pendentes",
+    "unreadMessages": "Mensagens Não Lidas",
+    "revenueToday": "Receita de Hoje",
+    "upcomingAppointments": "Próximas Consultas",
+    "recentPatients": "Pacientes Recentes",
+    "quickActions": "Ações Rápidas"
+  },
+  "patient": {
+    "title": "Pacientes",
+    "newPatient": "Novo Paciente",
+    "searchPatient": "Pesquisar pacientes...",
+    "medicalRecordNumber": "Nº do Prontuário",
+    "dateOfBirth": "Data de Nascimento",
+    "gender": "Sexo",
+    "bloodType": "Tipo Sanguíneo",
+    "insurance": "Convênio",
+    "emergencyContact": "Contato de Emergência",
+    "allergies": "Alergias",
+    "medications": "Medicamentos",
+    "medicalHistory": "Histórico Médico",
+    "timeline": "Linha do Tempo"
+  },
+  "appointment": {
+    "title": "Consultas",
+    "newAppointment": "Nova Consulta",
+    "schedule": "Agendar",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "noShow": "Não Compareceu",
+    "cancel": "Cancelar Consulta",
+    "reschedule": "Reagendar",
+    "duration": "Duração",
+    "provider": "Profissional",
+    "reason": "Motivo",
+    "status": {
+      "scheduled": "Agendada",
+      "confirmed": "Confirmada",
+      "checkedIn": "Check-in Realizado",
+      "inProgress": "Em Andamento",
+      "completed": "Concluída",
+      "cancelled": "Cancelada",
+      "noShow": "Não Compareceu"
+    }
+  },
+  "billing": {
+    "title": "Faturamento",
+    "invoice": "Fatura",
+    "claim": "Guia",
+    "payment": "Pagamento",
+    "total": "Total",
+    "paid": "Pago",
+    "balance": "Saldo Devedor",
+    "status": "Status"
+  },
+  "prescription": {
+    "title": "Receitas",
+    "newPrescription": "Nova Receita",
+    "medication": "Medicação",
+    "dosage": "Dosagem",
+    "frequency": "Frequência",
+    "duration": "Duração",
+    "refills": "Renovações",
+    "pharmacy": "Farmácia"
+  },
+  "lab": {
+    "title": "Resultados de Laboratório",
+    "orderLab": "Solicitar Exame",
+    "testName": "Nome do Exame",
+    "result": "Resultado",
+    "referenceRange": "Valor de Referência",
+    "status": "Status",
+    "abnormal": "Anormal",
+    "normal": "Normal"
+  },
+  "settings": {
+    "title": "Configurações",
+    "profile": "Perfil",
+    "notifications": "Notificações",
+    "security": "Segurança",
+    "appearance": "Aparência",
+    "language": "Idioma",
+    "theme": {
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema"
+    }
+  },
+  "notification": {
+    "title": "Notificações",
+    "markAllRead": "Marcar todas como lidas",
+    "noNotifications": "Sem notificações",
+    "appointmentReminder": "Lembrete de Consulta",
+    "labResultReady": "Resultado de Exame Pronto",
+    "newMessage": "Nova Mensagem"
+  }
+}

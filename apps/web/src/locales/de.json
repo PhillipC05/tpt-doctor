@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "Wird geladen...",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "actions": "Aktionen",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "close": "Schließen",
+    "noData": "Keine Daten gefunden",
+    "yes": "Ja",
+    "no": "Nein",
+    "all": "Alle",
+    "status": "Status",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "notes": "Notizen",
+    "description": "Beschreibung",
+    "name": "Name",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "address": "Adresse"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "patients": "Patienten",
+    "appointments": "Termine",
+    "billing": "Abrechnung",
+    "prescriptions": "Rezepte",
+    "lab": "Laborergebnisse",
+    "messages": "Nachrichten",
+    "staff": "Personal",
+    "settings": "Einstellungen",
+    "reports": "Berichte",
+    "auditLog": "Prüfprotokoll"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Willkommen zurück, {{name}}",
+    "todayAppointments": "Heutige Termine",
+    "pendingResults": "Ausstehende Ergebnisse",
+    "unreadMessages": "Ungelesene Nachrichten",
+    "revenueToday": "Heutige Einnahmen",
+    "upcomingAppointments": "Bevorstehende Termine",
+    "recentPatients": "Letzte Patienten",
+    "quickActions": "Schnellaktionen"
+  },
+  "patient": {
+    "title": "Patienten",
+    "newPatient": "Neuer Patient",
+    "searchPatient": "Patienten suchen...",
+    "medicalRecordNumber": "Patienten-ID",
+    "dateOfBirth": "Geburtsdatum",
+    "gender": "Geschlecht",
+    "bloodType": "Blutgruppe",
+    "insurance": "Versicherung",
+    "emergencyContact": "Notfallkontakt",
+    "allergies": "Allergien",
+    "medications": "Medikamente",
+    "medicalHistory": "Krankengeschichte",
+    "timeline": "Zeitleiste"
+  },
+  "appointment": {
+    "title": "Termine",
+    "newAppointment": "Neuer Termin",
+    "schedule": "Planen",
+    "checkIn": "Einchecken",
+    "checkOut": "Auschecken",
+    "noShow": "Nicht erschienen",
+    "cancel": "Termin stornieren",
+    "reschedule": "Umplanen",
+    "duration": "Dauer",
+    "provider": "Arzt",
+    "reason": "Grund",
+    "status": {
+      "scheduled": "Geplant",
+      "confirmed": "Bestätigt",
+      "checkedIn": "Eingecheckt",
+      "inProgress": "In Bearbeitung",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert",
+      "noShow": "Nicht erschienen"
+    }
+  },
+  "billing": {
+    "title": "Abrechnung",
+    "invoice": "Rechnung",
+    "claim": "Abrechnung",
+    "payment": "Zahlung",
+    "total": "Gesamt",
+    "paid": "Bezahlt",
+    "balance": "Offener Betrag",
+    "status": "Status"
+  },
+  "prescription": {
+    "title": "Rezepte",
+    "newPrescription": "Neues Rezept",
+    "medication": "Medikation",
+    "dosage": "Dosierung",
+    "frequency": "Häufigkeit",
+    "duration": "Dauer",
+    "refills": "Wiederholungen",
+    "pharmacy": "Apotheke"
+  },
+  "lab": {
+    "title": "Laborergebnisse",
+    "orderLab": "Labortest anordnen",
+    "testName": "Testname",
+    "result": "Ergebnis",
+    "referenceRange": "Referenzbereich",
+    "status": "Status",
+    "abnormal": "Abnormal",
+    "normal": "Normal"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "profile": "Profil",
+    "notifications": "Benachrichtigungen",
+    "security": "Sicherheit",
+    "appearance": "Darstellung",
+    "language": "Sprache",
+    "theme": {
+      "light": "Hell",
+      "dark": "Dunkel",
+      "system": "System"
+    }
+  },
+  "notification": {
+    "title": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "noNotifications": "Keine Benachrichtigungen",
+    "appointmentReminder": "Terminerinnerung",
+    "labResultReady": "Laborergebnis bereit",
+    "newMessage": "Neue Nachricht"
+  }
+}

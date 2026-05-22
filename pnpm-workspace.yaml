@@ -1,0 +1,13 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "modules/*"
+allowBuilds:
+  '@nestjs/core': set this to true or false
+  '@prisma/client': set this to true or false
+  '@prisma/engines': set this to true or false
+  '@scarf/scarf': set this to true or false
+  browser-tabs-lock: set this to true or false
+  core-js: set this to true or false
+  esbuild: set this to true or false
+  prisma: set this to true or false

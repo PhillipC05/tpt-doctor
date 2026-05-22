@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "actions": "Acciones",
+    "confirm": "Confirmar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "close": "Cerrar",
+    "noData": "No se encontraron datos",
+    "yes": "Sí",
+    "no": "No",
+    "all": "Todos",
+    "status": "Estado",
+    "date": "Fecha",
+    "time": "Hora",
+    "notes": "Notas",
+    "description": "Descripción",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "address": "Dirección"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "patients": "Pacientes",
+    "appointments": "Citas",
+    "billing": "Facturación",
+    "prescriptions": "Recetas",
+    "lab": "Resultados de Laboratorio",
+    "messages": "Mensajes",
+    "staff": "Personal",
+    "settings": "Configuración",
+    "reports": "Informes",
+    "auditLog": "Registro de Auditoría"
+  },
+  "dashboard": {
+    "title": "Panel Principal",
+    "welcome": "Bienvenido de nuevo, {{name}}",
+    "todayAppointments": "Citas de Hoy",
+    "pendingResults": "Resultados Pendientes",
+    "unreadMessages": "Mensajes No Leídos",
+    "revenueToday": "Ingresos de Hoy",
+    "upcomingAppointments": "Próximas Citas",
+    "recentPatients": "Pacientes Recientes",
+    "quickActions": "Acciones Rápidas"
+  },
+  "patient": {
+    "title": "Pacientes",
+    "newPatient": "Nuevo Paciente",
+    "searchPatient": "Buscar pacientes...",
+    "medicalRecordNumber": "NHC",
+    "dateOfBirth": "Fecha de Nacimiento",
+    "gender": "Género",
+    "bloodType": "Grupo Sanguíneo",
+    "insurance": "Seguro",
+    "emergencyContact": "Contacto de Emergencia",
+    "allergies": "Alergias",
+    "medications": "Medicamentos",
+    "medicalHistory": "Historial Médico",
+    "timeline": "Cronología"
+  },
+  "appointment": {
+    "title": "Citas",
+    "newAppointment": "Nueva Cita",
+    "schedule": "Programar",
+    "checkIn": "Registrar",
+    "checkOut": "Finalizar",
+    "noShow": "No Asistió",
+    "cancel": "Cancelar Cita",
+    "reschedule": "Reprogramar",
+    "duration": "Duración",
+    "provider": "Proveedor",
+    "reason": "Motivo",
+    "status": {
+      "scheduled": "Programada",
+      "confirmed": "Confirmada",
+      "checkedIn": "Registrada",
+      "inProgress": "En Progreso",
+      "completed": "Completada",
+      "cancelled": "Cancelada",
+      "noShow": "No Asistió"
+    }
+  },
+  "billing": {
+    "title": "Facturación",
+    "invoice": "Factura",
+    "claim": "Reclamación",
+    "payment": "Pago",
+    "total": "Total",
+    "paid": "Pagado",
+    "balance": "Saldo Pendiente",
+    "status": "Estado"
+  },
+  "prescription": {
+    "title": "Recetas",
+    "newPrescription": "Nueva Receta",
+    "medication": "Medicación",
+    "dosage": "Dosis",
+    "frequency": "Frecuencia",
+    "duration": "Duración",
+    "refills": "Repeticiones",
+    "pharmacy": "Farmacia"
+  },
+  "lab": {
+    "title": "Resultados de Laboratorio",
+    "orderLab": "Solicitar Análisis",
+    "testName": "Nombre de la Prueba",
+    "result": "Resultado",
+    "referenceRange": "Rango de Referencia",
+    "status": "Estado",
+    "abnormal": "Anormal",
+    "normal": "Normal"
+  },
+  "settings": {
+    "title": "Configuración",
+    "profile": "Perfil",
+    "notifications": "Notificaciones",
+    "security": "Seguridad",
+    "appearance": "Apariencia",
+    "language": "Idioma",
+    "theme": {
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema"
+    }
+  },
+  "notification": {
+    "title": "Notificaciones",
+    "markAllRead": "Marcar todo como leído",
+    "noNotifications": "Sin notificaciones",
+    "appointmentReminder": "Recordatorio de Cita",
+    "labResultReady": "Resultado de Laboratorio Listo",
+    "newMessage": "Nuevo Mensaje"
+  }
+}

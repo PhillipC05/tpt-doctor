@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+.out/
+
+# Environment
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Database
+prisma/*.db
+*.sqlite
+
+# Docker
+docker-data/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Encryption
+*.key
+*.pem
+*.cert
+

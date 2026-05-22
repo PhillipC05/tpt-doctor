@@ -1,0 +1,29 @@
+{
+  "name": "@tpt-doctor/database",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "migrate:prod": "prisma migrate deploy",
+    "seed": "tsx src/seed.ts",
+    "studio": "prisma studio",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.12.0",
+    "@tpt-doctor/config": "workspace:*",
+    "@tpt-doctor/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "prisma": "^5.12.0",
+    "typescript": "^5.4.0",
+    "rimraf": "^5.0.0",
+    "tsx": "^4.7.0"
+  }
+}

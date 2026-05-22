@@ -1,0 +1,216 @@
+/* ============================================================================
+   TPT Doctor — Patient Portal Responsive Design
+   Mobile-optimised for bedside / mobile browser use
+   ============================================================================ */
+
+/* Base mobile-first breakpoints */
+@media (max-width: 640px) {
+  .portal-container {
+    padding: 0.75rem;
+  }
+
+  .portal-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .portal-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+
+  .info-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .info-label {
+    font-size: 0.75rem;
+  }
+
+  .info-value {
+    font-size: 0.875rem;
+  }
+
+  /* Stack action buttons */
+  .action-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .action-row button,
+  .action-row a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Full-width tables -> card layout */
+  table.responsive-table thead {
+    display: none;
+  }
+
+  table.responsive-table tr {
+    display: block;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  table.responsive-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.375rem 0;
+    border: none;
+    font-size: 0.875rem;
+  }
+
+  table.responsive-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  /* Modal fullscreen on mobile */
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal-content {
+    border-radius: 0;
+    max-height: 100vh;
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Form elements */
+  input, select, textarea {
+    font-size: 16px !important; /* Prevent iOS zoom */
+  }
+
+  .form-group {
+    margin-bottom: 0.75rem;
+  }
+
+  /* Navigation */
+  .nav-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-around;
+    padding: 0.5rem 0;
+    z-index: 50;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .nav-bottom a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.625rem;
+    color: #6b7280;
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .nav-bottom a.active {
+    color: #2563eb;
+  }
+
+  .nav-bottom a svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-bottom: 0.125rem;
+  }
+
+  /* Bottom padding for bottom nav */
+  body {
+    padding-bottom: 4rem;
+  }
+}
+
+/* Tablet adjustments (641px - 1024px) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .portal-container {
+    padding: 1rem;
+  }
+
+  .sidebar {
+    width: 16rem;
+  }
+}
+
+/* Landscape phone support */
+@media (max-width: 896px) and (orientation: landscape) {
+  .modal-content {
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .nav-bottom {
+    padding: 0.25rem 0;
+  }
+
+  .nav-bottom a {
+    font-size: 0.5625rem;
+  }
+}
+
+/* Touch target sizing */
+@media (pointer: coarse) {
+  button, a, .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  input, select, textarea {
+    min-height: 44px;
+  }
+}
+
+/* Dark mode support for mobile */
+@media (prefers-color-scheme: dark) {
+  .nav-bottom {
+    background: #1f2937;
+    border-top-color: #374151;
+  }
+
+  .nav-bottom a {
+    color: #9ca3af;
+  }
+
+  .nav-bottom a.active {
+    color: #60a5fa;
+  }
+
+  table.responsive-table tr {
+    border-color: #374151;
+    background: #1f2937;
+  }
+}
+
+/* Print styles for mobile */
+@media print {
+  .nav-bottom {
+    display: none !important;
+  }
+
+  body {
+    padding-bottom: 0 !important;
+  }
+}

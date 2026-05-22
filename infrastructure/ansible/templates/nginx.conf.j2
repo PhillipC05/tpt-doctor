@@ -1,0 +1,86 @@
+# ============================================================================
+# TPT Doctor — Nginx Configuration (Ansible Template)
+# ============================================================================
+
+upstream api {
+    server api:4000;
+}
+
+upstream web {
+    server web:3000;
+}
+
+upstream portal {
+    server patient-portal:3001;
+}
+
+upstream grafana {
+    server grafana:3000;
+}
+
+# HTTP → HTTPS Redirect
+server {
+    listen 80;
+    server_name {{ ansible_fqdn }};
+    return 301 https://$server_name$request_uri;
+}
+
+# HTTPS Server
+server {
+    listen 443 ssl http2;
+    server_name {{ ansible_fqdn }};
+
+    ssl_certificate {{ app_home }}/ssl/fullchain.pem;
+    ssl_certificate_key {{ app_home }}/ssl/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1h;
+
+    # Security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-Frame-Options DENY;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header Referrer-Policy strict-origin-when-cross-origin;
+
+    # API
+    location /api/ {
+        proxy_pass http://api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+
+    # Web Frontend
+    location / {
+        proxy_pass http://web;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Patient Portal
+    location /portal/ {
+        proxy_pass http://portal;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Grafana (restricted to admin access)
+    location /grafana/ {
+        proxy_pass http://grafana;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        auth_basic "Admin Area";
+        auth_basic_user_file {{ app_home }}/nginx/.htpasswd;
+    }
+}

@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "جار التحميل...",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "filter": "تصفية",
+    "actions": "إجراءات",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "next": "التالي",
+    "close": "إغلاق",
+    "noData": "لا توجد بيانات",
+    "yes": "نعم",
+    "no": "لا",
+    "all": "الكل",
+    "status": "الحالة",
+    "date": "التاريخ",
+    "time": "الوقت",
+    "notes": "ملاحظات",
+    "description": "الوصف",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "address": "العنوان"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "patients": "المرضى",
+    "appointments": "المواعيد",
+    "billing": "الفواتير",
+    "prescriptions": "الوصفات الطبية",
+    "lab": "نتائج المختبر",
+    "messages": "الرسائل",
+    "staff": "الموظفين",
+    "settings": "الإعدادات",
+    "reports": "التقارير",
+    "auditLog": "سجل التدقيق"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحباً بعودتك، {{name}}",
+    "todayAppointments": "مواعيد اليوم",
+    "pendingResults": "نتائج معلقة",
+    "unreadMessages": "رسائل غير مقروءة",
+    "revenueToday": "إيرادات اليوم",
+    "upcomingAppointments": "المواعيد القادمة",
+    "recentPatients": "المرضى الجدد",
+    "quickActions": "إجراءات سريعة"
+  },
+  "patient": {
+    "title": "المرضى",
+    "newPatient": "مريض جديد",
+    "searchPatient": "بحث عن مريض...",
+    "medicalRecordNumber": "رقم الملف",
+    "dateOfBirth": "تاريخ الميلاد",
+    "gender": "الجنس",
+    "bloodType": "فصيلة الدم",
+    "insurance": "التأمين",
+    "emergencyContact": "جهة اتصال طارئة",
+    "allergies": "الحساسية",
+    "medications": "الأدوية",
+    "medicalHistory": "التاريخ الطبي",
+    "timeline": "الجدول الزمني"
+  },
+  "appointment": {
+    "title": "المواعيد",
+    "newAppointment": "موعد جديد",
+    "schedule": "جدولة",
+    "checkIn": "تسجيل الدخول",
+    "checkOut": "تسجيل الخروج",
+    "noShow": "لم يحضر",
+    "cancel": "إلغاء الموعد",
+    "reschedule": "إعادة جدولة",
+    "duration": "المدة",
+    "provider": "الطبيب",
+    "reason": "السبب",
+    "status": {
+      "scheduled": "مجدول",
+      "confirmed": "مؤكد",
+      "checkedIn": "تم التسجيل",
+      "inProgress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "cancelled": "ملغي",
+      "noShow": "لم يحضر"
+    }
+  },
+  "billing": {
+    "title": "الفواتير",
+    "invoice": "فاتورة",
+    "claim": "مطالبة",
+    "payment": "دفعة",
+    "total": "الإجمالي",
+    "paid": "مدفوع",
+    "balance": "الرصيد المستحق",
+    "status": "الحالة"
+  },
+  "prescription": {
+    "title": "الوصفات الطبية",
+    "newPrescription": "وصفة جديدة",
+    "medication": "الدواء",
+    "dosage": "الجرعة",
+    "frequency": "التكرار",
+    "duration": "المدة",
+    "refills": "إعادة تعبئة",
+    "pharmacy": "الصيدلية"
+  },
+  "lab": {
+    "title": "نتائج المختبر",
+    "orderLab": "طلب تحليل",
+    "testName": "اسم التحليل",
+    "result": "النتيجة",
+    "referenceRange": "النطاق المرجعي",
+    "status": "الحالة",
+    "abnormal": "غير طبيعي",
+    "normal": "طبيعي"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "profile": "الملف الشخصي",
+    "notifications": "الإشعارات",
+    "security": "الأمان",
+    "appearance": "المظهر",
+    "language": "اللغة",
+    "theme": {
+      "light": "فاتح",
+      "dark": "داكن",
+      "system": "النظام"
+    }
+  },
+  "notification": {
+    "title": "الإشعارات",
+    "markAllRead": "تحديد الكل كمقروء",
+    "noNotifications": "لا توجد إشعارات",
+    "appointmentReminder": "تذكير بالموعد",
+    "labResultReady": "نتيجة المختبر جاهزة",
+    "newMessage": "رسالة جديدة"
+  }
+}

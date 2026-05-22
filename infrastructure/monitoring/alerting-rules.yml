@@ -1,0 +1,194 @@
+# ============================================================================
+# TPT Doctor — Prometheus Alerting Rules
+# ============================================================================
+
+groups:
+  - name: TPTDoctor_Alerts
+    interval: 30s
+    rules:
+      # ===== API Health =====
+      - alert: APIHighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: "API error rate > 5% for 5 minutes"
+          description: "API error rate is {{ $value | humanizePercentage }}"
+
+      - alert: APIHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "API p95 latency > 2s"
+          description: "p95 latency is {{ $value }}s"
+
+      - alert: APIDown
+        expr: up{job="tpt-doctor-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: "API instance is down"
+          description: "API instance {{ $labels.instance }} has been down for more than 1 minute"
+
+      # ===== Database =====
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: postgres
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL instance {{ $labels.instance }} is unreachable"
+
+      - alert: PostgreSQLHighConnections
+        expr: pg_stat_activity_count > 200
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+        annotations:
+          summary: "PostgreSQL connection count high"
+          description: "PostgreSQL has {{ $value }} active connections"
+
+      - alert: PostgreSQLReplicationLag
+        expr: pg_replication_lag_seconds > 60
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+        annotations:
+          summary: "PostgreSQL replication lag > 60s"
+          description: "Replication lag is {{ $value }}s"
+
+      - alert: PostgreSQLHighDiskUsage
+        expr: pg_database_size_bytes / on (instance) pg_database_max_size_bytes > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          service: postgres
+        annotations:
+          summary: "PostgreSQL disk usage > 85%"
+          description: "Database disk usage is {{ $value | humanizePercentage }}"
+
+      # ===== Redis =====
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis is down"
+          description: "Redis instance {{ $labels.instance }} is unreachable"
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Redis memory usage > 85%"
+          description: "Redis memory usage is {{ $value | humanizePercentage }}"
+
+      - alert: RedisHighEvictions
+        expr: rate(redis_evicted_keys_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Redis evictions > 10/s"
+          description: "Redis is evicting {{ $value }} keys/s"
+
+      # ===== Infrastructure =====
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "CPU usage > 80%"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "Memory usage > 85%"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: HighDiskUsage
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.15
+        for: 10m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "Disk space < 15% free"
+          description: "Disk on {{ $labels.instance }} has {{ $value | humanizePercentage }} free"
+
+      - alert: DiskIOHighLatency
+        expr: rate(node_disk_io_time_seconds_total[5m]) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          service: infrastructure
+        annotations:
+          summary: "High disk I/O latency"
+          description: "Disk I/O latency on {{ $labels.instance }}"
+
+      # ===== Security =====
+      - alert: HighFailedLogins
+        expr: rate(node_login_records_total{result="failure"}[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "High rate of failed logins"
+          description: "Failed login rate is {{ $value }}/s"
+
+      - alert: TLSExpiring
+        expr: probe_ssl_earliest_cert_expiry{job="tpt-doctor-api"} < 2592000
+        for: 1h
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "TLS certificate expiring in < 30 days"
+          description: "Certificate for {{ $labels.instance }} expires in {{ $value | humanizeDuration }}"
+
+      # ===== Business Metrics =====
+      - alert: AppointmentNoShowRateHigh
+        expr: rate(appointments_no_show_total[30d]) / rate(appointments_total[30d]) > 0.15
+        for: 1d
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "No-show rate > 15% (30-day rolling)"
+          description: "No-show rate is {{ $value | humanizePercentage }}"
+
+      - alert: LowAppointmentCompletionRate
+        expr: rate(appointments_completed_total[7d]) / rate(appointments_scheduled_total[7d]) < 0.7
+        for: 1d
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "Appointment completion rate < 70%"
+          description: "Completion rate is {{ $value | humanizePercentage }}"
+</write_to_file>

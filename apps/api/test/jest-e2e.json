@@ -1,0 +1,18 @@
+{
+  "moduleFileExtensions": ["ts", "js", "json"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@tpt-doctor/auth$": "<rootDir>/../../packages/auth/src",
+    "^@tpt-doctor/audit-log$": "<rootDir>/../../packages/audit-log/src",
+    "^@tpt-doctor/compliance$": "<rootDir>/../../packages/compliance/src",
+    "^@tpt-doctor/config$": "<rootDir>/../../packages/config/src",
+    "^@tpt-doctor/database$": "<rootDir>/../../packages/database/src",
+    "^@tpt-doctor/encryption$": "<rootDir>/../../packages/encryption/src",
+    "^@tpt-doctor/shared$": "<rootDir>/../../packages/shared/src"
+  }
+}

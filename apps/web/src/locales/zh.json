@@ -1,0 +1,142 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "search": "搜索",
+    "filter": "筛选",
+    "actions": "操作",
+    "confirm": "确认",
+    "back": "返回",
+    "next": "下一步",
+    "close": "关闭",
+    "noData": "未找到数据",
+    "yes": "是",
+    "no": "否",
+    "all": "全部",
+    "status": "状态",
+    "date": "日期",
+    "time": "时间",
+    "notes": "备注",
+    "description": "描述",
+    "name": "姓名",
+    "email": "邮箱",
+    "phone": "电话",
+    "address": "地址"
+  },
+  "nav": {
+    "dashboard": "仪表盘",
+    "patients": "患者",
+    "appointments": "预约",
+    "billing": "账单",
+    "prescriptions": "处方",
+    "lab": "化验结果",
+    "messages": "消息",
+    "staff": "员工",
+    "settings": "设置",
+    "reports": "报告",
+    "auditLog": "审计日志"
+  },
+  "dashboard": {
+    "title": "仪表盘",
+    "welcome": "欢迎回来，{{name}}",
+    "todayAppointments": "今日预约",
+    "pendingResults": "待处理结果",
+    "unreadMessages": "未读消息",
+    "revenueToday": "今日收入",
+    "upcomingAppointments": "即将到来的预约",
+    "recentPatients": "最近的患者",
+    "quickActions": "快捷操作"
+  },
+  "patient": {
+    "title": "患者",
+    "newPatient": "新患者",
+    "searchPatient": "搜索患者...",
+    "medicalRecordNumber": "病历号",
+    "dateOfBirth": "出生日期",
+    "gender": "性别",
+    "bloodType": "血型",
+    "insurance": "保险",
+    "emergencyContact": "紧急联系人",
+    "allergies": "过敏史",
+    "medications": "用药",
+    "medicalHistory": "病史",
+    "timeline": "时间线"
+  },
+  "appointment": {
+    "title": "预约",
+    "newAppointment": "新建预约",
+    "schedule": "安排",
+    "checkIn": "签到",
+    "checkOut": "签出",
+    "noShow": "未到场",
+    "cancel": "取消预约",
+    "reschedule": "重新安排",
+    "duration": "时长",
+    "provider": "医生",
+    "reason": "原因",
+    "status": {
+      "scheduled": "已安排",
+      "confirmed": "已确认",
+      "checkedIn": "已签到",
+      "inProgress": "进行中",
+      "completed": "已完成",
+      "cancelled": "已取消",
+      "noShow": "未到场"
+    }
+  },
+  "billing": {
+    "title": "账单",
+    "invoice": "发票",
+    "claim": "索赔",
+    "payment": "付款",
+    "total": "总计",
+    "paid": "已支付",
+    "balance": "应付余额",
+    "status": "状态"
+  },
+  "prescription": {
+    "title": "处方",
+    "newPrescription": "新处方",
+    "medication": "药物",
+    "dosage": "剂量",
+    "frequency": "频率",
+    "duration": "疗程",
+    "refills": "续方次数",
+    "pharmacy": "药房"
+  },
+  "lab": {
+    "title": "化验结果",
+    "orderLab": "开化验单",
+    "testName": "检验项目",
+    "result": "结果",
+    "referenceRange": "参考范围",
+    "status": "状态",
+    "abnormal": "异常",
+    "normal": "正常"
+  },
+  "settings": {
+    "title": "设置",
+    "profile": "个人资料",
+    "notifications": "通知",
+    "security": "安全",
+    "appearance": "外观",
+    "language": "语言",
+    "theme": {
+      "light": "浅色",
+      "dark": "深色",
+      "system": "跟随系统"
+    }
+  },
+  "notification": {
+    "title": "通知",
+    "markAllRead": "全部标记为已读",
+    "noNotifications": "暂无通知",
+    "appointmentReminder": "预约提醒",
+    "labResultReady": "化验结果已出",
+    "newMessage": "新消息"
+  }
+}

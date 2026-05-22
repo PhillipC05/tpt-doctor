@@ -1,0 +1,214 @@
+/* ============================================================================
+   TPT Doctor — Print-Friendly Styles
+   ============================================================================ */
+
+@media print {
+  /* Hide navigation and interactive elements */
+  .no-print,
+  nav,
+  button,
+  .btn,
+  [role="button"],
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure only-print elements are visible */
+  .print-only {
+    display: block !important;
+  }
+
+  /* Reset colors for print */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  /* Remove shadows and rounded corners */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Ensure dark mode renders as light for print */
+  .dark,
+  .dark * {
+    background: white !important;
+    color: black !important;
+    border-color: #ccc !important;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  th,
+  td {
+    border: 1px solid #ddd !important;
+    padding: 6px 8px;
+    font-size: 9pt;
+  }
+
+  th {
+    background: #f5f5f5 !important;
+    color: black !important;
+    font-weight: bold;
+  }
+
+  /* Cards become simple blocks */
+  .card,
+  [class*="bg-white"],
+  [class*="dark:bg-"] {
+    background: white !important;
+    border: 1px solid #ddd !important;
+    margin-bottom: 12px;
+    padding: 12px;
+  }
+
+  /* Headers */
+  h1 { font-size: 18pt; margin: 0 0 8px; }
+  h2 { font-size: 14pt; margin: 0 0 6px; }
+  h3 { font-size: 12pt; margin: 0 0 4px; }
+
+  /* Links */
+  a {
+    color: black !important;
+    text-decoration: underline;
+  }
+
+  /* Images */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* Footer with page numbers */
+  @page {
+    margin: 2cm;
+    @bottom-center {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 8pt;
+      color: #666;
+    }
+  }
+
+  /* Header with practice info */
+  .print-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+  }
+
+  .print-header h1 {
+    font-size: 16pt;
+    margin: 0;
+  }
+
+  .print-header p {
+    font-size: 9pt;
+    margin: 2px 0;
+    color: #555;
+  }
+
+  /* Footer */
+  .print-footer {
+    display: block !important;
+    text-align: center;
+    font-size: 8pt;
+    color: #888;
+    border-top: 1px solid #ddd;
+    padding-top: 6px;
+    margin-top: 20px;
+  }
+
+  /* Badge colors */
+  .badge-success,
+  [class*="bg-green"] {
+    background: #e8f5e9 !important;
+    color: #2e7d32 !important;
+    border: 1px solid #a5d6a7;
+  }
+
+  .badge-warning,
+  [class*="bg-yellow"] {
+    background: #fff8e1 !important;
+    color: #f57f17 !important;
+    border: 1px solid #ffe082;
+  }
+
+  .badge-danger,
+  [class*="bg-red"] {
+    background: #ffebee !important;
+    color: #c62828 !important;
+    border: 1px solid #ef9a9a;
+  }
+
+  /* Clinical notes specific */
+  .clinical-note {
+    border-left: 3px solid #1976d2;
+    padding-left: 12px;
+    margin: 8px 0;
+  }
+
+  .vitals-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+  }
+
+  .vitals-item {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+  }
+
+  .vitals-item .label {
+    font-size: 8pt;
+    color: #666;
+  }
+
+  .vitals-item .value {
+    font-size: 12pt;
+    font-weight: bold;
+  }
+
+  /* Signature line */
+  .signature-line {
+    margin-top: 40px;
+    padding-top: 4px;
+    border-top: 1px solid #333;
+    width: 250px;
+    font-size: 10pt;
+  }
+}
+
+/* Screen-only elements */
+.print-only {
+  display: none;
+}

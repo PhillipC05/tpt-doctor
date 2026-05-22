@@ -1,0 +1,57 @@
+{
+  "name": "tpt-doctor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TPT Doctor — Complete Medical Practice Platform",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "esbuild",
+      "@scarf/scarf"
+    ]
+  },
+  "scripts": {
+    "dev": "pnpm --parallel -r run dev",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "test:security": "pnpm test:audit && pnpm test:hipaa",
+    "lint": "pnpm -r run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "typecheck": "pnpm -r run typecheck",
+    "db:migrate": "pnpm --filter @tpt-doctor/database run migrate",
+    "db:generate": "pnpm --filter @tpt-doctor/database run generate",
+    "db:seed": "pnpm --filter @tpt-doctor/database run seed",
+    "clean": "pnpm -r run clean",
+    "audit": "pnpm audit --audit-level=high",
+    "audit:all": "pnpm audit --audit-level=moderate",
+    "audit:deps": "pnpm licenses list",
+    "security:check": "pnpm audit && pnpm lint && pnpm typecheck"
+  },
+  "pre-commit": [
+    "lint",
+    "typecheck",
+    "audit"
+  ],
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.0",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.4.0"
+  }
+}

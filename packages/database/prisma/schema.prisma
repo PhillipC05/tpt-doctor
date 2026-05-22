@@ -1,0 +1,3310 @@
+// ============================================================================
+// TPT Doctor — Prisma Schema (PostgreSQL)
+// HIPAA/GDPR/AU/NZ Compliant with Row-Level Security
+// ============================================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [uuid_ossp, pgcrypto]
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  SUPER_ADMIN
+  PRACTICE_ADMIN
+  DOCTOR
+  NURSE
+  RECEPTIONIST
+  PATIENT
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  CHECKED_IN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  RESCHEDULED
+}
+
+enum EncounterType {
+  OFFICE_VISIT
+  TELEMEDICINE
+  HOME_VISIT
+  EMERGENCY
+  FOLLOW_UP
+  ROUTINE_CHECKUP
+  CONSULTATION
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum BloodType {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+  UNKNOWN
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  SEPARATED
+  DOMESTIC_PARTNER
+}
+
+enum InsuranceType {
+  PRIVATE
+  MEDICARE
+  MEDICAID
+  VA
+  SELF_PAY
+  WORKERS_COMP
+}
+
+enum ClaimStatus {
+  DRAFT
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+  PAID
+  DENIED
+  APPEALED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  ACH
+  CASH
+  CHECK
+}
+
+enum PaymentProvider {
+  STRIPE
+  AIRWALLEX
+}
+
+enum PrescriptionStatus {
+  DRAFT
+  SUBMITTED
+  FILLED
+  PARTIALLY_FILLED
+  CANCELLED
+  EXPIRED
+}
+
+enum LabStatus {
+  ORDERED
+  SPECIMEN_COLLECTED
+  IN_TRANSIT
+  IN_PROGRESS
+  COMPLETED
+  REVIEWED
+  CANCELLED
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  PRINT
+  VIEW_PHI
+  CONSENT_GRANTED
+  CONSENT_REVOKED
+  DATA_BREACH
+}
+
+enum ConsentType {
+  TREATMENT
+  PAYMENT
+  HEALTHCARE_OPERATIONS
+  RESEARCH
+  MARKETING
+  DISCLOSURE
+  TELEMEDICINE
+  RECORDING
+}
+
+enum ComplianceFramework {
+  HIPAA
+  GDPR
+  AU_PRIVACY
+  NZ_HISO
+}
+
+enum DataRegion {
+  US
+  EU
+  AU
+  NZ
+}
+
+enum Severity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+enum NotificationType {
+  APPOINTMENT_REMINDER
+  LAB_RESULT
+  MESSAGE
+  PRESCRIPTION_REFILL
+  BILLING
+  SYSTEM
+}
+
+enum WaitlistStatus {
+  WAITING
+  NOTIFIED
+  BOOKED
+  CANCELLED
+  EXPIRED
+}
+
+enum ReminderChannel {
+  EMAIL
+  SMS
+  BOTH
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum CheckInStatus {
+  PENDING
+  CHECKED_IN
+  CHECKED_OUT
+  NO_SHOW
+}
+
+enum PTOStatus {
+  PENDING
+  APPROVED
+  DENIED
+  CANCELLED
+}
+
+enum CredentialType {
+  MEDICAL_LICENSE
+  BOARD_CERTIFICATION
+  DEA_REGISTRATION
+  NPI_NUMBER
+  MALPRACTICE_INSURANCE
+  BLS_CERTIFICATION
+  ACLS_CERTIFICATION
+  CONTINUING_EDUCATION
+  HOSPITAL_PRIVILEGES
+  MEDICAID_PROVIDER
+  MEDICARE_PROVIDER
+}
+
+enum CredentialStatus {
+  ACTIVE
+  EXPIRED
+  PENDING_RENEWAL
+  REVOKED
+  SUSPENDED
+}
+
+enum DecisionSupportCategory {
+  DRUG_INTERACTION
+  ALLERGY_CHECK
+  DOSAGE_CHECK
+  DUPLICATE_THERAPY
+  PREVENTIVE_CARE
+  GUIDELINE_COMPLIANCE
+  AGE_BASED
+  CONDITION_BASED
+}
+
+enum DecisionSupportSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+// --- Tenant / Organization ---
+model Tenant {
+  id                   String                @id @default(uuid()) @db.Uuid
+  name                 String                @db.VarChar(200)
+  slug                 String                @unique @db.VarChar(50)
+  dataRegion           DataRegion
+  complianceFrameworks ComplianceFramework[]
+  isActive             Boolean               @default(true)
+  settings             Json                  @default("{}") // TenantSettings
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  staff         StaffMember[]
+  patients      Patient[]
+  appointments  Appointment[]
+  encounters    Encounter[]
+  invoices      Invoice[]
+  claims        Claim[]
+  prescriptions Prescription[]
+  labOrders     LabOrder[]
+  documents     Document[]
+  auditLogs     AuditLogEntry[]
+  messages      Message[]
+  notifications Notification[]
+  payments      Payment[]
+
+  // Phase 14 relations
+  savedReports                SavedReport[]
+  reportExecutionLogs         ReportExecutionLog[]
+  revenueSnapshots            RevenueAnalyticsSnapshot[]
+  appointmentUtilSnapshots    AppointmentUtilizationSnapshot[]
+  clinicianProductivitySnaps  ClinicianProductivitySnapshot[]
+  clinicRooms                 ClinicRoom[]
+  roomOccupancyLogs           RoomOccupancyLog[]
+  tasks                       Task[]
+  taskComments                TaskComment[]
+  documentFolders             DocumentFolder[]
+  documentTags                DocumentTag[]
+  letterTemplates             LetterTemplate[]
+  generatedLetters            GeneratedLetter[]
+  inventoryCategories         InventoryCategory[]
+  inventoryItems              InventoryItem[]
+  inventoryTransactions       InventoryTransaction[]
+  purchaseOrders              PurchaseOrder[]
+  vaccineInventory            VaccineInventory[]
+  vaccineAdministrations      VaccineAdministration[]
+  medicationSamples           MedicationSample[]
+  sampleDistributions         SampleDistribution[]
+  retailProducts              RetailProduct[]
+  posSales                    PosSale[]
+  WaitlistEntry               WaitlistEntry[]
+  BlockTime                   BlockTime[]
+  AppointmentReminder         AppointmentReminder[]
+  MessageTemplate             MessageTemplate[]
+  InsuranceVerification       InsuranceVerification[]
+  ClaimSubmission             ClaimSubmission[]
+  EraRecord                   EraRecord[]
+  BillingStatement            BillingStatement[]
+  WriteOff                    WriteOff[]
+  Refund                      Refund[]
+  CopayCollection             CopayCollection[]
+  HsaFsaAccount               HsaFsaAccount[]
+  ControlledSubstanceLog      ControlledSubstanceLog[]
+  EPrescribingTransaction     EPrescribingTransaction[]
+  LabPanel                    LabPanel[]
+  ExternalLabConfig           ExternalLabConfig[]
+  FhirImportLog               FhirImportLog[]
+  AgingReport                 AgingReport[]
+  CheckInRecord               CheckInRecord[]
+  TimeOffRequest              TimeOffRequest[]
+  Credential                  Credential[]
+  EhrTemplate                 EhrTemplate[]
+  DecisionSupportRule         DecisionSupportRule[]
+  PatientMergeLog             PatientMergeLog[]
+  TelemedicineSession         TelemedicineSession[]
+  Referral                    Referral[]
+  CarePlan                    CarePlan[]
+  MedicalCertificate          MedicalCertificate[]
+  PatientIntake               PatientIntake[]
+  CountryProfileConfig        CountryProfileConfig[]
+  MbsClaimSubmission          MbsClaimSubmission[]
+  PbsPrescription             PbsPrescription[]
+  MyHealthRecordDocument      MyHealthRecordDocument[]
+  AirRecordSubmission         AirRecordSubmission[]
+  PipReport                   PipReport[]
+  NzClaimSubmission           NzClaimSubmission[]
+  PhoReport                   PhoReport[]
+  NzImmunisationSubmission    NzImmunisationSubmission[]
+  NhiValidationLog            NhiValidationLog[]
+  UkGp2GpTransfer             UkGp2GpTransfer[]
+  UkQofReport                 UkQofReport[]
+  UkGpConnectInteraction      UkGpConnectInteraction[]
+  UkSpineInteraction          UkSpineInteraction[]
+  UkEpsPrescription           UkEpsPrescription[]
+  CaProvincialClaimSubmission CaProvincialClaimSubmission[]
+  CaImmunisationSubmission    CaImmunisationSubmission[]
+  CaInfowayInteraction        CaInfowayInteraction[]
+  ApiKey                      ApiKey[]
+
+  @@map("tenants")
+}
+
+// --- Users (Auth0-linked) ---
+model User {
+  id          String    @id @default(uuid()) @db.Uuid
+  email       String    @unique @db.VarChar(255)
+  firstName   String    @db.VarChar(100)
+  lastName    String    @db.VarChar(100)
+  phone       String?   @db.VarChar(20)
+  avatarUrl   String?
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+  auth0Id     String    @unique @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  staffProfile     StaffMember?
+  patientProfile   Patient?
+  sentMessages     Message[]        @relation("SentMessages")
+  receivedMessages Message[]        @relation("ReceivedMessages")
+  notifications    Notification[]
+  auditLogs        AuditLogEntry[]
+  consentGiven     PatientConsent[] @relation("ConsentGivenBy")
+  EhrTemplate      EhrTemplate[]
+
+  @@map("users")
+}
+
+// --- Staff Members ---
+model StaffMember {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenantId       String   @db.Uuid
+  userId         String   @unique @db.Uuid
+  role           UserRole
+  permissions    String[] // Permission enum values
+  title          String   @db.VarChar(200)
+  licenseNumber  String?  @db.VarChar(100)
+  npiNumber      String?  @db.VarChar(50) // US NPI
+  specialization String?  @db.VarChar(200)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant                        Tenant                          @relation(fields: [tenantId], references: [id])
+  user                          User                            @relation(fields: [userId], references: [id])
+  primaryCarePatients           Patient[]                       @relation("PrimaryCareProvider")
+  appointments                  Appointment[]
+  encounters                    Encounter[]
+  prescriptions                 Prescription[]
+  labOrders                     LabOrder[]
+  schedules                     StaffSchedule[]
+  WaitlistEntry                 WaitlistEntry[]
+  BlockTime                     BlockTime[]
+  ControlledSubstanceLog        ControlledSubstanceLog[]
+  TimeOffRequest                TimeOffRequest[]
+  Credential                    Credential[]
+  TelemedicineSession           TelemedicineSession[]
+  Referral                      Referral[]
+  CarePlan                      CarePlan[]
+  MedicalCertificate            MedicalCertificate[]
+  PatientIntake                 PatientIntake[]
+  PbsPrescription               PbsPrescription[]
+  ClinicianProductivitySnapshot ClinicianProductivitySnapshot[]
+  Task                          Task[]
+  SampleDistribution            SampleDistribution[]
+
+  @@unique([tenantId, licenseNumber])
+  @@unique([tenantId, npiNumber])
+  @@map("staff_members")
+}
+
+// --- Staff Schedules ---
+model StaffSchedule {
+  id           String    @id @default(uuid()) @db.Uuid
+  staffId      String    @db.Uuid
+  dayOfWeek    Int // 0=Sunday, 6=Saturday
+  startTime    String    @db.VarChar(5) // "09:00"
+  endTime      String    @db.VarChar(5) // "17:00"
+  isAvailable  Boolean   @default(true)
+  isRecurring  Boolean   @default(true)
+  specificDate DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  staff StaffMember @relation(fields: [staffId], references: [id])
+
+  @@unique([staffId, dayOfWeek, specificDate])
+  @@map("staff_schedules")
+}
+
+// --- Patients ---
+model Patient {
+  id                    String         @id @default(uuid()) @db.Uuid
+  tenantId              String         @db.Uuid
+  userId                String?        @unique @db.Uuid
+  medicalRecordNumber   String         @unique @db.VarChar(50)
+  firstName             String         @db.VarChar(100)
+  lastName              String         @db.VarChar(100)
+  dateOfBirth           DateTime       @db.Date
+  gender                Gender
+  bloodType             BloodType?
+  maritalStatus         MaritalStatus?
+  ssn                   String? // Encrypted PHI
+  email                 String         @db.VarChar(255)
+  phone                 String         @db.VarChar(20)
+  address               Json           @default("{}") // Address
+  emergencyContact      Json? // EmergencyContact
+  primaryCareProviderId String?        @db.Uuid
+  preferredPharmacyId   String?        @db.Uuid
+  isActive              Boolean        @default(true)
+  tags                  String[]       @default([])
+  notes                 String?        @db.Text
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  tenant                      Tenant                        @relation(fields: [tenantId], references: [id])
+  user                        User?                         @relation(fields: [userId], references: [id])
+  primaryCareProvider         StaffMember?                  @relation("PrimaryCareProvider", fields: [primaryCareProviderId], references: [id])
+  insurance                   PatientInsurance[]
+  consents                    PatientConsent[]
+  appointments                Appointment[]
+  encounters                  Encounter[]
+  medicalConditions           MedicalCondition[]
+  allergies                   Allergy[]
+  immunizations               Immunization[]
+  medications                 PatientMedication[]
+  documents                   Document[]
+  invoices                    Invoice[]
+  claims                      Claim[]
+  prescriptions               Prescription[]
+  labOrders                   LabOrder[]
+  WaitlistEntry               WaitlistEntry[]
+  InsuranceVerification       InsuranceVerification[]
+  BillingStatement            BillingStatement[]
+  CopayCollection             CopayCollection[]
+  HsaFsaAccount               HsaFsaAccount[]
+  ControlledSubstanceLog      ControlledSubstanceLog[]
+  CheckInRecord               CheckInRecord[]
+  TelemedicineSession         TelemedicineSession[]
+  Referral                    Referral[]
+  CarePlan                    CarePlan[]
+  MedicalCertificate          MedicalCertificate[]
+  PatientIntake               PatientIntake[]
+  MbsClaimSubmission          MbsClaimSubmission[]
+  PbsPrescription             PbsPrescription[]
+  MyHealthRecordDocument      MyHealthRecordDocument[]
+  AirRecordSubmission         AirRecordSubmission[]
+  NzClaimSubmission           NzClaimSubmission[]
+  NzImmunisationSubmission    NzImmunisationSubmission[]
+  UkGp2GpTransfer             UkGp2GpTransfer[]
+  UkGpConnectInteraction      UkGpConnectInteraction[]
+  UkSpineInteraction          UkSpineInteraction[]
+  CaProvincialClaimSubmission CaProvincialClaimSubmission[]
+  CaImmunisationSubmission    CaImmunisationSubmission[]
+  CaInfowayInteraction        CaInfowayInteraction[]
+  GeneratedLetter             GeneratedLetter[]
+  VaccineAdministration       VaccineAdministration[]
+  SampleDistribution          SampleDistribution[]
+  PosSale                     PosSale[]
+
+  @@index([tenantId, lastName, firstName])
+  @@index([tenantId, medicalRecordNumber])
+  @@index([tenantId, email])
+  @@map("patients")
+}
+
+// --- Patient Insurance ---
+model PatientInsurance {
+  id            String        @id @default(uuid()) @db.Uuid
+  patientId     String        @db.Uuid
+  provider      String        @db.VarChar(200)
+  policyNumber  String        @db.VarChar(100)
+  groupNumber   String?       @db.VarChar(100)
+  insuranceType InsuranceType
+  isPrimary     Boolean       @default(false)
+  coverageStart DateTime      @db.Date
+  coverageEnd   DateTime?     @db.Date
+  copay         Decimal       @default(0) @db.Decimal(10, 2)
+  deductible    Decimal       @default(0) @db.Decimal(10, 2)
+  deductibleMet Decimal       @default(0) @db.Decimal(10, 2)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  patient               Patient                 @relation(fields: [patientId], references: [id])
+  claims                Claim[]
+  InsuranceVerification InsuranceVerification[]
+
+  @@map("patient_insurance")
+}
+
+// --- Patient Consents ---
+model PatientConsent {
+  id          String      @id @default(uuid()) @db.Uuid
+  patientId   String      @db.Uuid
+  consentType ConsentType
+  isGranted   Boolean     @default(false)
+  grantedAt   DateTime?
+  grantedBy   String?     @db.Uuid // User ID who recorded consent
+  revokedAt   DateTime?
+  expiresAt   DateTime?
+  notes       String?     @db.Text
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  patient       Patient @relation(fields: [patientId], references: [id])
+  grantedByUser User?   @relation("ConsentGivenBy", fields: [grantedBy], references: [id])
+
+  @@unique([patientId, consentType])
+  @@map("patient_consents")
+}
+
+// --- Appointments ---
+model Appointment {
+  id               String            @id @default(uuid()) @db.Uuid
+  tenantId         String            @db.Uuid
+  patientId        String            @db.Uuid
+  staffId          String            @db.Uuid
+  title            String            @db.VarChar(200)
+  description      String?           @db.Text
+  startTime        DateTime
+  endTime          DateTime
+  status           AppointmentStatus @default(SCHEDULED)
+  type             EncounterType
+  isRecurring      Boolean           @default(false)
+  recurringPattern Json? // RecurringPattern
+  location         String?           @db.VarChar(200)
+  notes            String?           @db.Text
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  tenant              Tenant                @relation(fields: [tenantId], references: [id])
+  patient             Patient               @relation(fields: [patientId], references: [id])
+  staff               StaffMember           @relation(fields: [staffId], references: [id])
+  encounter           Encounter?
+  AppointmentReminder AppointmentReminder[]
+  CopayCollection     CopayCollection[]
+  CheckInRecord       CheckInRecord?
+  TelemedicineSession TelemedicineSession?
+
+  @@index([tenantId, startTime])
+  @@index([tenantId, patientId])
+  @@index([tenantId, staffId])
+  @@map("appointments")
+}
+
+// --- Encounters (EHR / SOAP Notes) ---
+model Encounter {
+  id             String        @id @default(uuid()) @db.Uuid
+  tenantId       String        @db.Uuid
+  patientId      String        @db.Uuid
+  staffId        String        @db.Uuid
+  appointmentId  String?       @unique @db.Uuid
+  encounterType  EncounterType
+  date           DateTime      @default(now())
+  chiefComplaint String        @db.VarChar(500)
+  subjective     String?       @db.Text
+  objective      String?       @db.Text
+  assessment     String?       @db.Text
+  plan           String?       @db.Text
+  vitals         Json? // Vitals
+  isSigned       Boolean       @default(false)
+  signedAt       DateTime?
+  signedBy       String?       @db.Uuid
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  tenant         Tenant          @relation(fields: [tenantId], references: [id])
+  patient        Patient         @relation(fields: [patientId], references: [id])
+  staff          StaffMember     @relation(fields: [staffId], references: [id])
+  appointment    Appointment?    @relation(fields: [appointmentId], references: [id])
+  diagnosisCodes DiagnosisCode[]
+  documents      Document[]
+
+  @@index([tenantId, patientId])
+  @@index([tenantId, date])
+  @@map("encounters")
+}
+
+// --- Diagnosis Codes (ICD-10) ---
+model DiagnosisCode {
+  id          String   @id @default(uuid()) @db.Uuid
+  encounterId String   @db.Uuid
+  code        String   @db.VarChar(20) // ICD-10
+  description String   @db.VarChar(500)
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  encounter Encounter @relation(fields: [encounterId], references: [id])
+
+  @@map("diagnosis_codes")
+}
+
+// --- Medical Conditions ---
+model MedicalCondition {
+  id           String    @id @default(uuid()) @db.Uuid
+  patientId    String    @db.Uuid
+  code         String    @db.VarChar(20)
+  description  String    @db.VarChar(500)
+  onsetDate    DateTime  @db.Date
+  resolvedDate DateTime? @db.Date
+  isChronic    Boolean   @default(false)
+  severity     String?   @db.VarChar(20) // MILD, MODERATE, SEVERE
+  notes        String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@map("medical_conditions")
+}
+
+// --- Allergies ---
+model Allergy {
+  id        String   @id @default(uuid()) @db.Uuid
+  patientId String   @db.Uuid
+  allergen  String   @db.VarChar(200)
+  reaction  String   @db.VarChar(500)
+  severity  Severity @default(WARNING)
+  onsetDate DateTime @db.Date
+  isActive  Boolean  @default(true)
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@map("allergies")
+}
+
+// --- Immunizations ---
+model Immunization {
+  id                 String   @id @default(uuid()) @db.Uuid
+  patientId          String   @db.Uuid
+  vaccineName        String   @db.VarChar(200)
+  cvxCode            String   @db.VarChar(10)
+  administrationDate DateTime @db.Date
+  administeredBy     String   @db.VarChar(200)
+  lotNumber          String   @db.VarChar(50)
+  manufacturer       String   @db.VarChar(200)
+  doseNumber         Int      @default(1)
+  notes              String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  patient               Patient                 @relation(fields: [patientId], references: [id])
+  VaccineAdministration VaccineAdministration[]
+
+  @@index([patientId])
+  @@map("immunizations")
+}
+
+// --- Patient Medications ---
+model PatientMedication {
+  id             String    @id @default(uuid()) @db.Uuid
+  patientId      String    @db.Uuid
+  medicationName String    @db.VarChar(200)
+  strength       String    @db.VarChar(100)
+  form           String    @db.VarChar(100)
+  route          String    @db.VarChar(100)
+  frequency      String    @db.VarChar(100)
+  startDate      DateTime  @db.Date
+  endDate        DateTime? @db.Date
+  isActive       Boolean   @default(true)
+  prescribedBy   String    @db.Uuid
+  notes          String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@map("patient_medications")
+}
+
+// --- Documents ---
+model Document {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  encounterId String?  @db.Uuid
+  patientId   String   @db.Uuid
+  fileName    String   @db.VarChar(255)
+  fileSize    Int
+  mimeType    String   @db.VarChar(100)
+  storageKey  String   @unique @db.VarChar(500) // Encrypted S3/MinIO key
+  category    String?  @db.VarChar(100) // LAB_RESULT, IMAGING, CONSENT, etc.
+  isEncrypted Boolean  @default(true)
+  uploadedBy  String   @db.Uuid
+  createdAt   DateTime @default(now())
+
+  tenant          Tenant            @relation(fields: [tenantId], references: [id])
+  encounter       Encounter?        @relation(fields: [encounterId], references: [id])
+  patient         Patient           @relation(fields: [patientId], references: [id])
+  DocumentVersion DocumentVersion[]
+
+  @@index([patientId])
+  @@index([tenantId])
+  @@map("documents")
+}
+
+// --- Billing: Invoices ---
+model Invoice {
+  id            String        @id @default(uuid()) @db.Uuid
+  tenantId      String        @db.Uuid
+  patientId     String        @db.Uuid
+  invoiceNumber String        @unique @db.VarChar(50)
+  items         Json          @default("[]") // InvoiceItem[]
+  subtotal      Decimal       @db.Decimal(12, 2)
+  tax           Decimal       @default(0) @db.Decimal(12, 2)
+  discount      Decimal       @default(0) @db.Decimal(12, 2)
+  total         Decimal       @db.Decimal(12, 2)
+  amountPaid    Decimal       @default(0) @db.Decimal(12, 2)
+  balanceDue    Decimal       @db.Decimal(12, 2)
+  status        PaymentStatus @default(PENDING)
+  dueDate       DateTime
+  notes         String?       @db.Text
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  tenant   Tenant     @relation(fields: [tenantId], references: [id])
+  patient  Patient    @relation(fields: [patientId], references: [id])
+  claims   Claim[]
+  payments Payment[]
+  WriteOff WriteOff[]
+  Refund   Refund[]
+
+  @@index([tenantId, patientId])
+  @@index([tenantId, invoiceNumber])
+  @@map("invoices")
+}
+
+// --- Billing: Claims ---
+model Claim {
+  id            String      @id @default(uuid()) @db.Uuid
+  tenantId      String      @db.Uuid
+  patientId     String      @db.Uuid
+  invoiceId     String      @db.Uuid
+  claimNumber   String      @unique @db.VarChar(50)
+  insuranceId   String      @db.Uuid
+  serviceDate   DateTime    @db.Date
+  submittedDate DateTime?
+  status        ClaimStatus @default(DRAFT)
+  amount        Decimal     @db.Decimal(12, 2)
+  paidAmount    Decimal     @default(0) @db.Decimal(12, 2)
+  denialReason  String?     @db.Text
+  notes         String?     @db.Text
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  tenant          Tenant            @relation(fields: [tenantId], references: [id])
+  patient         Patient           @relation(fields: [patientId], references: [id])
+  invoice         Invoice           @relation(fields: [invoiceId], references: [id])
+  insurance       PatientInsurance  @relation(fields: [insuranceId], references: [id])
+  ClaimSubmission ClaimSubmission[]
+  EraRecord       EraRecord[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@map("claims")
+}
+
+// --- Billing: Payments ---
+model Payment {
+  id              String          @id @default(uuid()) @db.Uuid
+  tenantId        String          @db.Uuid
+  invoiceId       String          @db.Uuid
+  amount          Decimal         @db.Decimal(12, 2)
+  paymentMethod   PaymentMethod
+  paymentProvider PaymentProvider
+  transactionId   String?         @db.VarChar(200) // Stripe/Airwallex transaction ID
+  status          PaymentStatus   @default(PENDING)
+  paidAt          DateTime        @default(now())
+  notes           String?         @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id])
+  invoice Invoice  @relation(fields: [invoiceId], references: [id])
+  Refund  Refund[]
+
+  @@index([invoiceId])
+  @@index([tenantId])
+  @@map("payments")
+}
+
+// --- Prescriptions ---
+model Prescription {
+  id                String             @id @default(uuid()) @db.Uuid
+  tenantId          String             @db.Uuid
+  patientId         String             @db.Uuid
+  staffId           String             @db.Uuid
+  medicationName    String             @db.VarChar(200)
+  strength          String             @db.VarChar(100)
+  form              String             @db.VarChar(100)
+  route             String             @db.VarChar(100)
+  frequency         String             @db.VarChar(100)
+  duration          String             @db.VarChar(100)
+  quantity          Int
+  refills           Int                @default(0)
+  dispenseAsWritten Boolean            @default(false)
+  notes             String?            @db.Text
+  status            PrescriptionStatus @default(DRAFT)
+  pharmacyId        String?            @db.Uuid
+  submittedAt       DateTime?
+  filledAt          DateTime?
+  expiresAt         DateTime
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  tenant                  Tenant                    @relation(fields: [tenantId], references: [id])
+  patient                 Patient                   @relation(fields: [patientId], references: [id])
+  staff                   StaffMember               @relation(fields: [staffId], references: [id])
+  ControlledSubstanceLog  ControlledSubstanceLog[]
+  EPrescribingTransaction EPrescribingTransaction[]
+
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@map("prescriptions")
+}
+
+// --- Lab Orders ---
+model LabOrder {
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String    @db.Uuid
+  patientId   String    @db.Uuid
+  staffId     String    @db.Uuid
+  labName     String    @db.VarChar(200)
+  testName    String    @db.VarChar(200)
+  loincCode   String    @db.VarChar(20)
+  status      LabStatus @default(ORDERED)
+  orderedAt   DateTime  @default(now())
+  collectedAt DateTime?
+  resultAt    DateTime?
+  result      Json? // LabResult
+  notes       String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  tenant  Tenant      @relation(fields: [tenantId], references: [id])
+  patient Patient     @relation(fields: [patientId], references: [id])
+  staff   StaffMember @relation(fields: [staffId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@map("lab_orders")
+}
+
+// --- Audit Log (Immutable) ---
+model AuditLogEntry {
+  id           String      @id @default(uuid()) @db.Uuid
+  tenantId     String      @db.Uuid
+  userId       String      @db.Uuid
+  action       AuditAction
+  resource     String      @db.VarChar(100) // e.g. Patient, Encounter, Invoice
+  resourceId   String      @db.VarChar(100)
+  details      Json        @default("{}")
+  ipAddress    String      @db.VarChar(45)
+  userAgent    String?     @db.Text
+  timestamp    DateTime    @default(now())
+  tamperHash   String      @db.VarChar(64) // SHA-256 of this record
+  previousHash String      @db.VarChar(64) // SHA-256 of previous record
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, timestamp])
+  @@index([tenantId, resource, resourceId])
+  @@index([tenantId, userId])
+  @@map("audit_logs")
+}
+
+// --- Messages (Secure Messaging) ---
+model Message {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @db.Uuid
+  senderId        String    @db.Uuid
+  recipientId     String    @db.Uuid
+  subject         String    @db.VarChar(200)
+  body            String    @db.Text
+  attachments     Json      @default("[]") // MessageAttachment[]
+  isRead          Boolean   @default(false)
+  readAt          DateTime?
+  parentMessageId String?   @db.Uuid
+  isUrgent        Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant    Tenant @relation(fields: [tenantId], references: [id])
+  sender    User   @relation("SentMessages", fields: [senderId], references: [id])
+  recipient User   @relation("ReceivedMessages", fields: [recipientId], references: [id])
+
+  @@index([tenantId, recipientId, isRead])
+  @@index([tenantId, senderId])
+  @@map("messages")
+}
+
+// --- Notifications ---
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  tenantId  String           @db.Uuid
+  userId    String           @db.Uuid
+  type      NotificationType
+  title     String           @db.VarChar(200)
+  body      String?          @db.Text
+  data      Json             @default("{}")
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, userId, isRead])
+  @@index([tenantId, createdAt])
+  @@map("notifications")
+}
+
+// --- Waitlist ---
+model WaitlistEntry {
+  id                  String           @id @default(uuid()) @db.Uuid
+  tenantId            String           @db.Uuid
+  patientId           String           @db.Uuid
+  preferredDate       DateTime         @db.Date
+  preferredTime       String?          @db.VarChar(5)
+  preferredStaffId    String?          @db.Uuid
+  encounterType       EncounterType
+  notes               String?          @db.Text
+  status              WaitlistStatus   @default(WAITING)
+  notifiedAt          DateTime?
+  notifiedVia         ReminderChannel?
+  bookedAt            DateTime?
+  bookedAppointmentId String?          @db.Uuid
+  expiresAt           DateTime
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  tenant         Tenant       @relation(fields: [tenantId], references: [id])
+  patient        Patient      @relation(fields: [patientId], references: [id])
+  preferredStaff StaffMember? @relation(fields: [preferredStaffId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@map("waitlist_entries")
+}
+
+// --- Block Times (Override / Unavailability) ---
+model BlockTime {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @db.Uuid
+  staffId   String?  @db.Uuid // null = practice-wide block
+  title     String   @db.VarChar(200)
+  startTime DateTime
+  endTime   DateTime
+  isAllDay  Boolean  @default(false)
+  reason    String?  @db.VarChar(500)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant       @relation(fields: [tenantId], references: [id])
+  staff  StaffMember? @relation(fields: [staffId], references: [id])
+
+  @@index([tenantId, startTime, endTime])
+  @@index([tenantId, staffId])
+  @@map("block_times")
+}
+
+// --- Appointment Reminders ---
+model AppointmentReminder {
+  id            String          @id @default(uuid()) @db.Uuid
+  tenantId      String          @db.Uuid
+  appointmentId String          @db.Uuid
+  channel       ReminderChannel
+  scheduledFor  DateTime
+  sentAt        DateTime?
+  status        ReminderStatus  @default(PENDING)
+  errorMessage  String?         @db.Text
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, scheduledFor])
+  @@map("appointment_reminders")
+}
+
+// --- Message Templates ---
+model MessageTemplate {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @db.Uuid
+  name      String   @db.VarChar(200)
+  subject   String   @db.VarChar(200)
+  body      String   @db.Text
+  category  String   @db.VarChar(100) // APPOINTMENT_REMINDER, LAB_RESULT, GENERAL, etc.
+  variables String[] // supported template variables e.g. [patientName, appointmentDate]
+  isActive  Boolean  @default(true)
+  createdBy String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, category])
+  @@map("message_templates")
+}
+
+// --- CPT Codes Directory ---
+model CptCode {
+  id           String   @id @default(uuid()) @db.Uuid
+  code         String   @unique @db.VarChar(10)
+  description  String   @db.VarChar(500)
+  category     String   @db.VarChar(100) // EVALUATION_MGMT, SURGERY, RADIOLOGY, LAB, etc.
+  defaultPrice Decimal? @db.Decimal(12, 2)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("cpt_codes")
+}
+
+// --- ICD-10 Codes Directory ---
+model Icd10Code {
+  id          String   @id @default(uuid()) @db.Uuid
+  code        String   @unique @db.VarChar(20)
+  description String   @db.VarChar(500)
+  category    String   @db.VarChar(100)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("icd10_codes")
+}
+
+// --- Insurance Verification ---
+model InsuranceVerification {
+  id               String    @id @default(uuid()) @db.Uuid
+  tenantId         String    @db.Uuid
+  patientId        String    @db.Uuid
+  insuranceId      String    @db.Uuid
+  verificationDate DateTime  @default(now())
+  status           String    @db.VarChar(50) // VERIFIED, PENDING, FAILED, EXPIRED
+  eligibilityData  Json? // Eligibility response data
+  copay            Decimal?  @db.Decimal(10, 2)
+  deductible       Decimal?  @db.Decimal(10, 2)
+  deductibleMet    Decimal?  @db.Decimal(10, 2)
+  outOfPocketMax   Decimal?  @db.Decimal(10, 2)
+  verifiedBy       String    @db.Uuid
+  expiresAt        DateTime?
+  notes            String?   @db.Text
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tenant    Tenant           @relation(fields: [tenantId], references: [id])
+  patient   Patient          @relation(fields: [patientId], references: [id])
+  insurance PatientInsurance @relation(fields: [insuranceId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@map("insurance_verifications")
+}
+
+// --- Claim Submission (837 format) ---
+model ClaimSubmission {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @db.Uuid
+  claimId         String    @db.Uuid
+  submissionType  String    @db.VarChar(20) // ORIGINAL, REPLACEMENT, VOID
+  submissionData  Json // 837 formatted data
+  status          String    @db.VarChar(50) // PENDING, SUBMITTED, ACCEPTED, REJECTED
+  submittedAt     DateTime?
+  responseData    Json? // 277/999 response data
+  ackCode         String?   @db.VarChar(20)
+  rejectionReason String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  claim  Claim  @relation(fields: [claimId], references: [id])
+
+  @@index([tenantId, claimId])
+  @@index([tenantId, status])
+  @@map("claim_submissions")
+}
+
+// --- ERA / EOB Records ---
+model EraRecord {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenantId              String    @db.Uuid
+  claimId               String    @db.Uuid
+  payerClaimNumber      String?   @db.VarChar(100)
+  patientResponsibility Decimal?  @db.Decimal(12, 2)
+  amountPaid            Decimal?  @db.Decimal(12, 2)
+  adjustmentReason      String?   @db.Text
+  adjustmentAmount      Decimal?  @db.Decimal(12, 2)
+  serviceDate           DateTime?
+  processedDate         DateTime?
+  status                String    @db.VarChar(50) // RECEIVED, APPLIED, DISPUTED
+  eraData               Json? // Raw ERA 835 data
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  claim  Claim  @relation(fields: [claimId], references: [id])
+
+  @@index([tenantId, claimId])
+  @@map("era_records")
+}
+
+// --- Billing Statements ---
+model BillingStatement {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientId       String    @db.Uuid
+  statementNumber String    @unique @db.VarChar(50)
+  statementDate   DateTime  @default(now())
+  periodStart     DateTime
+  periodEnd       DateTime
+  totalBilled     Decimal   @db.Decimal(12, 2)
+  totalPaid       Decimal   @default(0) @db.Decimal(12, 2)
+  balanceDue      Decimal   @db.Decimal(12, 2)
+  items           Json      @default("[]") // line items from invoices
+  status          String    @default("GENERATED") @db.VarChar(50) // GENERATED, SENT, PAID, VOID
+  sentAt          DateTime?
+  sentVia         String?   @db.VarChar(50) // EMAIL, MAIL, PORTAL
+  notes           String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@map("billing_statements")
+}
+
+// --- Write-offs ---
+model WriteOff {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @db.Uuid
+  invoiceId    String   @db.Uuid
+  amount       Decimal  @db.Decimal(12, 2)
+  reason       String   @db.VarChar(500)
+  writeOffType String   @db.VarChar(50) // CHARITY, CONTRACTUAL, BAD_DEBT, OTHER
+  approvedBy   String   @db.Uuid
+  approvedAt   DateTime @default(now())
+  notes        String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([tenantId, invoiceId])
+  @@map("write_offs")
+}
+
+// --- Refunds ---
+model Refund {
+  id            String    @id @default(uuid()) @db.Uuid
+  tenantId      String    @db.Uuid
+  paymentId     String    @db.Uuid
+  invoiceId     String    @db.Uuid
+  amount        Decimal   @db.Decimal(12, 2)
+  reason        String    @db.VarChar(500)
+  status        String    @default("PENDING") @db.VarChar(50) // PENDING, PROCESSED, FAILED
+  transactionId String?   @db.VarChar(200) // Stripe/Airwallex refund ID
+  processedBy   String    @db.Uuid
+  processedAt   DateTime?
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  payment Payment @relation(fields: [paymentId], references: [id])
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([tenantId, paymentId])
+  @@map("refunds")
+}
+
+// --- Copay Tracking ---
+model CopayCollection {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @db.Uuid
+  patientId        String   @db.Uuid
+  appointmentId    String   @db.Uuid
+  amount           Decimal  @db.Decimal(10, 2)
+  collectionMethod String   @db.VarChar(50) // CASH, CARD, CHECK, BILLED
+  collectedBy      String   @db.Uuid
+  collectedAt      DateTime @default(now())
+  isVerified       Boolean  @default(false)
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  patient     Patient     @relation(fields: [patientId], references: [id])
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+
+  @@index([tenantId, patientId, collectedAt])
+  @@map("copay_collections")
+}
+
+// --- HSA / FSA Accounts ---
+model HsaFsaAccount {
+  id                String   @id @default(uuid()) @db.Uuid
+  tenantId          String   @db.Uuid
+  patientId         String   @db.Uuid
+  accountType       String   @db.VarChar(10) // HSA, FSA
+  accountNumber     String   @db.VarChar(100)
+  providerName      String   @db.VarChar(200)
+  balance           Decimal  @default(0) @db.Decimal(12, 2)
+  contributionLimit Decimal? @db.Decimal(12, 2)
+  isVerified        Boolean  @default(false)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@map("hsa_fsa_accounts")
+}
+
+// --- Pharmacy Directory ---
+model Pharmacy {
+  id                      String                    @id @default(uuid()) @db.Uuid
+  name                    String                    @db.VarChar(200)
+  ncpdpId                 String?                   @unique @db.VarChar(50) // National Council for Prescription Drug Programs ID
+  npiNumber               String?                   @db.VarChar(50)
+  address                 Json                      @default("{}") // Address
+  phone                   String?                   @db.VarChar(20)
+  fax                     String?                   @db.VarChar(20)
+  email                   String?                   @db.VarChar(255)
+  isActive                Boolean                   @default(true)
+  supportsEprescribing    Boolean                   @default(true)
+  supportedNetworks       String[] // e.g. ["Surescripts", "RxHub"]
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  EPrescribingTransaction EPrescribingTransaction[]
+
+  @@map("pharmacies")
+}
+
+// --- Drug Database (for interaction checking) ---
+model Drug {
+  id           String   @id @default(uuid()) @db.Uuid
+  ndc          String   @unique @db.VarChar(50) // National Drug Code
+  name         String   @db.VarChar(300)
+  genericName  String?  @db.VarChar(300)
+  brandName    String?  @db.VarChar(300)
+  drugClass    String?  @db.VarChar(100)
+  route        String?  @db.VarChar(100)
+  strength     String?  @db.VarChar(100)
+  form         String?  @db.VarChar(100)
+  manufacturer String?  @db.VarChar(200)
+  isControlled Boolean  @default(false)
+  schedule     String?  @db.VarChar(10) // CII, CIII, CIV, CV
+  deaClass     String?  @db.VarChar(50)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  interactions   DrugInteraction[] @relation("DrugAInteractions")
+  interactedWith DrugInteraction[] @relation("DrugBInteractions")
+
+  @@index([name])
+  @@index([ndc])
+  @@map("drugs")
+}
+
+// --- Drug Interactions ---
+model DrugInteraction {
+  id                String                  @id @default(uuid()) @db.Uuid
+  drugId            String                  @db.Uuid
+  interactingDrugId String                  @db.Uuid
+  severity          DecisionSupportSeverity @default(WARNING)
+  description       String                  @db.Text
+  mechanism         String?                 @db.VarChar(500)
+  management        String?                 @db.Text
+  evidence          String?                 @db.VarChar(500)
+  isActive          Boolean                 @default(true)
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  drug            Drug @relation("DrugAInteractions", fields: [drugId], references: [id])
+  interactingDrug Drug @relation("DrugBInteractions", fields: [interactingDrugId], references: [id])
+
+  @@unique([drugId, interactingDrugId])
+  @@map("drug_interactions")
+}
+
+// --- Controlled Substance Tracking ---
+model ControlledSubstanceLog {
+  id                String   @id @default(uuid()) @db.Uuid
+  tenantId          String   @db.Uuid
+  prescriptionId    String   @db.Uuid
+  action            String   @db.VarChar(50) // PRESCRIBED, DISPENSED, ADMINISTERED, WASTED, RETURNED
+  quantity          Int
+  remainingQuantity Int?
+  staffId           String   @db.Uuid
+  patientId         String   @db.Uuid
+  deaNumber         String?  @db.VarChar(20) // DEA number of prescriber
+  notes             String?  @db.Text
+  loggedAt          DateTime @default(now())
+  createdAt         DateTime @default(now())
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id])
+  prescription Prescription @relation(fields: [prescriptionId], references: [id])
+  staff        StaffMember  @relation(fields: [staffId], references: [id])
+  patient      Patient      @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, prescriptionId])
+  @@map("controlled_substance_logs")
+}
+
+// --- ePrescribing (Surescripts) Transactions ---
+model EPrescribingTransaction {
+  id               String    @id @default(uuid()) @db.Uuid
+  tenantId         String    @db.Uuid
+  prescriptionId   String    @db.Uuid
+  pharmacyId       String?   @db.Uuid
+  transactionType  String    @db.VarChar(50) // NEW_SCRIPT, REFILL, CANCEL, RENEWAL
+  status           String    @db.VarChar(50) // PENDING, SENT, DELIVERED, ACKNOWLEDGED, ERROR
+  surescriptsRefId String?   @db.VarChar(100)
+  requestData      Json? // Surescripts format request
+  responseData     Json? // Surescripts format response
+  errorMessage     String?   @db.Text
+  sentAt           DateTime?
+  acknowledgedAt   DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id])
+  prescription Prescription @relation(fields: [prescriptionId], references: [id])
+  pharmacy     Pharmacy?    @relation(fields: [pharmacyId], references: [id])
+
+  @@index([tenantId, prescriptionId])
+  @@index([tenantId, status])
+  @@map("eprescribing_transactions")
+}
+
+// --- Lab Panel Configuration ---
+model LabPanel {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  name        String   @db.VarChar(200)
+  description String?  @db.Text
+  labName     String   @db.VarChar(200) // Quest, LabCorp, etc.
+  tests       Json     @default("[]") // Array of {testName, loincCode, component}
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, labName])
+  @@map("lab_panels")
+}
+
+// --- External Lab Integration Config ---
+model ExternalLabConfig {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @db.Uuid
+  labName         String    @db.VarChar(200) // Quest, LabCorp, etc.
+  integrationType String    @db.VarChar(50) // FHIR, HL7, CSV, API
+  apiEndpoint     String?   @db.VarChar(500)
+  apiKey          String?   @db.VarChar(500) // encrypted
+  clientId        String?   @db.VarChar(200)
+  clientSecret    String?   @db.VarChar(500) // encrypted
+  settings        Json      @default("{}")
+  isActive        Boolean   @default(true)
+  lastSyncAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, labName])
+  @@map("external_lab_configs")
+}
+
+// --- HL7 FHIR Import Log ---
+model FhirImportLog {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @db.Uuid
+  source          String    @db.VarChar(100) // Quest, LabCorp, EHR
+  resourceType    String    @db.VarChar(100) // DiagnosticReport, Observation, etc.
+  totalRecords    Int
+  importedRecords Int
+  failedRecords   Int
+  status          String    @db.VarChar(50) // IN_PROGRESS, COMPLETED, FAILED
+  errorLog        Json? // Array of error details
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, source, status])
+  @@map("fhir_import_logs")
+}
+
+// ============================================================================
+// A/R Aging (Aging Reports)
+// ============================================================================
+
+model AgingReport {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @db.Uuid
+  reportDate       DateTime @default(now())
+  currentBalance   Decimal  @default(0) @db.Decimal(14, 2)
+  aging_0_30       Decimal  @default(0) @db.Decimal(14, 2)
+  aging_31_60      Decimal  @default(0) @db.Decimal(14, 2)
+  aging_61_90      Decimal  @default(0) @db.Decimal(14, 2)
+  aging_91_120     Decimal  @default(0) @db.Decimal(14, 2)
+  aging_120plus    Decimal  @default(0) @db.Decimal(14, 2)
+  totalOutstanding Decimal  @default(0) @db.Decimal(14, 2)
+  breakdown        Json     @default("[]") // Per-patient aging breakdown
+  createdAt        DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, reportDate])
+  @@map("aging_reports")
+}
+
+// --- Check-in / Check-out ---
+model CheckInRecord {
+  id              String        @id @default(uuid()) @db.Uuid
+  tenantId        String        @db.Uuid
+  appointmentId   String        @unique @db.Uuid
+  patientId       String        @db.Uuid
+  checkedInAt     DateTime      @default(now())
+  checkedInBy     String        @db.Uuid
+  checkedOutAt    DateTime?
+  checkedOutBy    String?       @db.Uuid
+  status          CheckInStatus @default(PENDING)
+  waitTimeMinutes Int? // actual wait time
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+  patient     Patient     @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@map("check_in_records")
+}
+
+// --- PTO / Leave Tracking ---
+model TimeOffRequest {
+  id         String    @id @default(uuid()) @db.Uuid
+  tenantId   String    @db.Uuid
+  staffId    String    @db.Uuid
+  startDate  DateTime  @db.Date
+  endDate    DateTime  @db.Date
+  reason     String    @db.VarChar(500)
+  type       String    @db.VarChar(50) // VACATION, SICK, PERSONAL, OTHER
+  status     PTOStatus @default(PENDING)
+  approvedBy String?   @db.Uuid
+  approvedAt DateTime?
+  notes      String?   @db.Text
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  tenant Tenant      @relation(fields: [tenantId], references: [id])
+  staff  StaffMember @relation(fields: [staffId], references: [id])
+
+  @@index([tenantId, staffId])
+  @@index([tenantId, status])
+  @@map("time_off_requests")
+}
+
+// --- Credentialing ---
+model Credential {
+  id               String           @id @default(uuid()) @db.Uuid
+  tenantId         String           @db.Uuid
+  staffId          String           @db.Uuid
+  credentialType   CredentialType
+  credentialNumber String           @db.VarChar(100)
+  issuingAuthority String           @db.VarChar(200)
+  issueDate        DateTime         @db.Date
+  expirationDate   DateTime         @db.Date
+  status           CredentialStatus @default(ACTIVE)
+  attachmentUrl    String?          @db.VarChar(500)
+  notes            String?          @db.Text
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  tenant Tenant      @relation(fields: [tenantId], references: [id])
+  staff  StaffMember @relation(fields: [staffId], references: [id])
+
+  @@unique([tenantId, staffId, credentialType])
+  @@index([tenantId, staffId])
+  @@index([tenantId, expirationDate])
+  @@map("credentials")
+}
+
+// --- EHR Templates ---
+model EhrTemplate {
+  id           String        @id @default(uuid()) @db.Uuid
+  tenantId     String        @db.Uuid
+  name         String        @db.VarChar(200)
+  description  String?       @db.Text
+  templateType EncounterType
+  category     String        @db.VarChar(100) // SOAP, HISTORY, PHYSICAL, NOTE
+  content      Json // Template structure (sections, fields)
+  isPublic     Boolean       @default(true) // available to all staff in tenant
+  createdBy    String        @db.Uuid
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  tenant  Tenant @relation(fields: [tenantId], references: [id])
+  creator User   @relation(fields: [createdBy], references: [id])
+
+  @@index([tenantId, templateType])
+  @@map("ehr_templates")
+}
+
+// --- Clinical Decision Support Rules ---
+model DecisionSupportRule {
+  id             String                  @id @default(uuid()) @db.Uuid
+  tenantId       String                  @db.Uuid
+  name           String                  @db.VarChar(200)
+  description    String?                 @db.Text
+  category       DecisionSupportCategory
+  severity       DecisionSupportSeverity @default(WARNING)
+  condition      Json // Rule condition expression
+  action         Json // Alert message, recommendation
+  isActive       Boolean                 @default(true)
+  appliesToRoles String[] // Staff roles this applies to
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, category])
+  @@map("decision_support_rules")
+}
+
+// --- Patient Dedup / Merge (Auxiliary table for tracking merges) ---
+model PatientMergeLog {
+  id                 String   @id @default(uuid()) @db.Uuid
+  tenantId           String   @db.Uuid
+  survivingPatientId String   @db.Uuid
+  mergedPatientId    String   @db.Uuid
+  mergedAt           DateTime @default(now())
+  mergedBy           String   @db.Uuid
+  mergeReason        String?  @db.Text
+  survivingSnapshot  Json // Snapshot of surviving patient after merge
+  mergedSnapshot     Json // Snapshot of merged patient before merge
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, survivingPatientId])
+  @@map("patient_merge_logs")
+}
+
+// --- Telemedicine Sessions ---
+model TelemedicineSession {
+  id               String    @id @default(uuid()) @db.Uuid
+  tenantId         String    @db.Uuid
+  appointmentId    String    @unique @db.Uuid
+  patientId        String    @db.Uuid
+  staffId          String    @db.Uuid
+  status           String    @db.VarChar(50) // SCHEDULED, IN_WAITING_ROOM, IN_PROGRESS, COMPLETED, CANCELLED
+  roomName         String    @unique @db.VarChar(200)
+  roomToken        String?   @db.Text
+  startedAt        DateTime?
+  endedAt          DateTime?
+  durationMinutes  Int?
+  isRecorded       Boolean   @default(false)
+  recordingUrl     String?   @db.VarChar(500)
+  recordingConsent Boolean   @default(false)
+  bandwidthScore   String?   @db.VarChar(20) // EXCELLENT, GOOD, FAIR, POOR
+  qualityScore     String?   @db.VarChar(20) // HD, STANDARD, LOW
+  notes            String?   @db.Text
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tenant                  Tenant                    @relation(fields: [tenantId], references: [id])
+  appointment             Appointment               @relation(fields: [appointmentId], references: [id])
+  patient                 Patient                   @relation(fields: [patientId], references: [id])
+  staff                   StaffMember               @relation(fields: [staffId], references: [id])
+  TelemedicineChatMessage TelemedicineChatMessage[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@index([tenantId, staffId])
+  @@map("telemedicine_sessions")
+}
+
+// --- Referrals (NEW - Phase 12) ---
+enum ReferralStatus {
+  DRAFT
+  SENT
+  ACKNOWLEDGED
+  BOOKED
+  COMPLETED
+  CLOSED
+  CANCELLED
+}
+
+enum ReferralPriority {
+  URGENT
+  SEMI_URGENT
+  ROUTINE
+}
+
+enum ReferralType {
+  EXTERNAL_SPECIALIST
+  INTERNAL_SPECIALIST
+  ALLIED_HEALTH
+  DIAGNOSTIC_IMAGING
+  PATHOLOGY
+  HOSPITAL
+  COMMUNITY_SERVICE
+}
+
+model Referral {
+  id                 String           @id @default(uuid()) @db.Uuid
+  tenantId           String           @db.Uuid
+  patientId          String           @db.Uuid
+  referringStaffId   String           @db.Uuid
+  referralType       ReferralType
+  priority           ReferralPriority @default(ROUTINE)
+  status             ReferralStatus   @default(DRAFT)
+  specialistName     String?          @db.VarChar(200)
+  specialistContact  String?          @db.VarChar(200)
+  specialty          String?          @db.VarChar(200)
+  facility           String?          @db.VarChar(200)
+  reason             String           @db.Text
+  clinicalNotes      String?          @db.Text
+  letterContent      String?          @db.Text // Generated referral letter
+  diagnosisCodes     Json? // [{code, description}]
+  requestedDate      DateTime
+  acknowledgedAt     DateTime?
+  bookedAt           DateTime?
+  completedAt        DateTime?
+  closedAt           DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?          @db.Text
+  responseNotes      String?          @db.Text // Specialist response
+  attachments        Json             @default("[]") // Referral attachment keys
+  isUrgent           Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  tenant         Tenant      @relation(fields: [tenantId], references: [id])
+  patient        Patient     @relation(fields: [patientId], references: [id])
+  referringStaff StaffMember @relation(fields: [referringStaffId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@index([tenantId, referringStaffId])
+  @@index([tenantId, priority])
+  @@map("referrals")
+}
+
+// --- Care Plans / Chronic Disease Management (NEW - Phase 12) ---
+enum CarePlanType {
+  GP_MANAGEMENT_PLAN
+  TEAM_CARE_ARRANGEMENT
+  MENTAL_HEALTH_TREATMENT_PLAN
+  HEALTH_ASSESSMENT
+  CHRONIC_DISEASE_MANAGEMENT
+  MULTIDISCIPLINARY_CARE
+}
+
+enum CarePlanStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  EXPIRED
+  REVIEW_DUE
+}
+
+model CarePlan {
+  id                  String         @id @default(uuid()) @db.Uuid
+  tenantId            String         @db.Uuid
+  patientId           String         @db.Uuid
+  staffId             String         @db.Uuid
+  planType            CarePlanType
+  status              CarePlanStatus @default(ACTIVE)
+  title               String         @db.VarChar(200)
+  description         String?        @db.Text
+  diagnosisCodes      Json? // [{code, description, isPrimary}]
+  goals               Json           @default("[]") // Array of {description, targetDate, achieved, achievedAt, notes}
+  interventions       Json           @default("[]") // Array of {description, frequency, provider, startDate, endDate, notes}
+  teamMembers         Json           @default("[]") // Array of {name, role, discipline, organization, contact}
+  clinicalIndicators  Json? // [{name, value, target, date}] e.g. HbA1c, BP
+  startDate           DateTime       @db.Date
+  reviewDate          DateTime?      @db.Date
+  completedDate       DateTime?      @db.Date
+  expiryDate          DateTime?      @db.Date
+  lastReviewDate      DateTime?
+  nextReviewDate      DateTime?
+  isSharedWithPatient Boolean        @default(false)
+  patientNotes        String?        @db.Text
+  clinicalNotes       String?        @db.Text
+  externalReferences  Json           @default("[]") // Links to encounters, documents, referrals
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  tenant  Tenant      @relation(fields: [tenantId], references: [id])
+  patient Patient     @relation(fields: [patientId], references: [id])
+  staff   StaffMember @relation(fields: [staffId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@index([tenantId, planType])
+  @@index([tenantId, status])
+  @@index([tenantId, nextReviewDate])
+  @@map("care_plans")
+}
+
+// --- Medical Certificates (NEW - Phase 12) ---
+enum CertificateType {
+  SICK_LEAVE
+  WORKERS_COMPENSATION
+  FITNESS_FOR_WORK
+  MEDICAL_EXEMPTION
+  VACCINATION_EXEMPTION
+  ACC_INJURY_REPORT // New Zealand ACC
+  WORKCOVER_CERTIFICATE // Australia
+  GENERAL_MEDICAL
+}
+
+enum CertificateStatus {
+  DRAFT
+  ISSUED
+  VOID
+  EXPIRED
+}
+
+model MedicalCertificate {
+  id                String            @id @default(uuid()) @db.Uuid
+  tenantId          String            @db.Uuid
+  patientId         String            @db.Uuid
+  staffId           String            @db.Uuid
+  certificateType   CertificateType
+  status            CertificateStatus @default(DRAFT)
+  certificateNumber String            @unique @db.VarChar(50)
+  issueDate         DateTime          @default(now())
+  startDate         DateTime          @db.Date
+  endDate           DateTime?         @db.Date
+  diagnosisCode     String?           @db.VarChar(20)
+  diagnosisDesc     String?           @db.VarChar(500)
+  restrictions      String?           @db.Text
+  recommendations   String?           @db.Text
+  body              String?           @db.Text // Full certificate text
+  verificationCode  String?           @db.VarChar(20) // QR-code verifiable
+  employerName      String?           @db.VarChar(200)
+  employerContact   String?           @db.VarChar(200)
+  isDigitallySigned Boolean           @default(false)
+  digitalSignature  String?           @db.Text
+  signedAt          DateTime?
+  voidReason        String?           @db.Text
+  attachments       Json              @default("[]")
+  notes             String?           @db.Text
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  tenant  Tenant      @relation(fields: [tenantId], references: [id])
+  patient Patient     @relation(fields: [patientId], references: [id])
+  staff   StaffMember @relation(fields: [staffId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@index([tenantId, certificateType])
+  @@index([tenantId, status])
+  @@index([tenantId, issueDate])
+  @@map("medical_certificates")
+}
+
+// --- Patient Intake / Self-Registration (NEW - Phase 12) ---
+enum IntakeStatus {
+  PENDING
+  COMPLETED
+  REVIEWED
+  REJECTED
+}
+
+model PatientIntake {
+  id                String       @id @default(uuid()) @db.Uuid
+  tenantId          String       @db.Uuid
+  patientId         String?      @db.Uuid // null until registration completes
+  status            IntakeStatus @default(PENDING)
+  firstName         String       @db.VarChar(100)
+  lastName          String       @db.VarChar(100)
+  email             String       @db.VarChar(255)
+  phone             String?      @db.VarChar(20)
+  dateOfBirth       DateTime     @db.Date
+  gender            Gender
+  address           Json         @default("{}")
+  emergencyContact  Json? // EmergencyContact
+  medicalHistory    Json? // Self-reported conditions, medications, allergies
+  insuranceInfo     Json? // Self-reported insurance
+  consentToTreat    Boolean      @default(false)
+  consentPrivacy    Boolean      @default(false)
+  consentTelehealth Boolean      @default(false)
+  identifiers       Json? // Government IDs uploaded {type, value, verified}
+  documents         Json         @default("[]") // Uploaded document keys (ID, card, referral)
+  reviewedBy        String?      @db.Uuid
+  reviewedAt        DateTime?
+  rejectionReason   String?      @db.Text
+  registrationToken String?      @unique @db.VarChar(100) // For email verification
+  tokenExpiresAt    DateTime?
+  verifiedAt        DateTime?
+  source            String       @default("PORTAL") @db.VarChar(50) // PORTAL, KIOSK, RECEPTION
+  notes             String?      @db.Text
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  tenant   Tenant       @relation(fields: [tenantId], references: [id])
+  patient  Patient?     @relation(fields: [patientId], references: [id])
+  reviewer StaffMember? @relation(fields: [reviewedBy], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, email])
+  @@index([tenantId, registrationToken])
+  @@map("patient_intakes")
+}
+
+// --- SNOMED CT Codes Directory (NEW - Phase 12) ---
+model SnomedCtCode {
+  id          String   @id @default(uuid()) @db.Uuid
+  conceptId   String   @unique @db.VarChar(20) // SNOMED CT Concept ID
+  description String   @db.VarChar(500)
+  parentId    String?  @db.VarChar(20)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("snomed_ct_codes")
+}
+
+// --- Code Mapping: ICD-10 <-> SNOMED CT (NEW - Phase 12) ---
+model CodeMapping {
+  id           String   @id @default(uuid()) @db.Uuid
+  sourceSystem String   @db.VarChar(20) // ICD10, SNOMED_CT
+  sourceCode   String   @db.VarChar(20)
+  targetSystem String   @db.VarChar(20) // SNOMED_CT, ICD10
+  targetCode   String   @db.VarChar(20)
+  mappingType  String   @default("EQUIVALENT") @db.VarChar(50) // EQUIVALENT, BROADER, NARROWER
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([sourceSystem, sourceCode, targetSystem])
+  @@index([sourceSystem, sourceCode])
+  @@index([targetSystem, targetCode])
+  @@map("code_mappings")
+}
+
+// --- Telemedicine Waiting Room Messages (in-consult chat) ---
+model TelemedicineChatMessage {
+  id         String   @id @default(uuid()) @db.Uuid
+  sessionId  String   @db.Uuid
+  senderId   String   @db.Uuid
+  senderType String   @db.VarChar(20) // STAFF, PATIENT
+  message    String   @db.Text
+  isSystem   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  session TelemedicineSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId, createdAt])
+  @@map("telemedicine_chat_messages")
+}
+
+// ============================================================================
+// Phase 11: Country Profiles & Regional Compliance
+// ============================================================================
+
+// === Country Profile Configuration ===
+
+model CountryProfileConfig {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @db.Uuid
+  countryCode      String   @db.VarChar(2) // AU, NZ, US, UK, CA
+  countryName      String   @db.VarChar(100)
+  diagnosisSystem  String   @db.VarChar(50) // ICD10, SNOMED_CT, READ_V2, etc.
+  currency         String   @default("AUD") @db.VarChar(3)
+  dateFormat       String   @default("dd/MM/yyyy") @db.VarChar(20)
+  phoneFormat      String?  @db.VarChar(50)
+  postalCodeFormat String?  @db.VarChar(50)
+  defaultLanguage  String   @default("en") @db.VarChar(10)
+  timezone         String   @db.VarChar(50)
+  regulatoryBody   String?  @db.VarChar(200)
+  privacyAct       String?  @db.VarChar(200)
+  dataRegion       String   @db.VarChar(2) // AU, NZ, US, EU
+  modules          Json     @default("[]") // CountryModuleConfig[]
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, countryCode])
+  @@index([tenantId])
+  @@index([countryCode])
+  @@map("country_profile_configs")
+}
+
+// === AU: MBS Claim Submissions ===
+
+model MbsClaimSubmission {
+  id                String    @id @default(uuid()) @db.Uuid
+  tenantId          String    @db.Uuid
+  patientId         String    @db.Uuid
+  claimNumber       String    @db.VarChar(50)
+  items             Json      @default("[]") // MbsClaimItem[]
+  totalAmount       Decimal   @db.Decimal(12, 2)
+  totalBenefit      Decimal   @db.Decimal(12, 2)
+  submissionMethod  String    @db.VarChar(50) // MEDICARE_ONLINE, ECLIPSE, HIB
+  submissionChannel String    @db.VarChar(50) // ELECTRONIC, WEB_PORTAL, PAPER, BATCH
+  status            String    @default("DRAFT") @db.VarChar(50)
+  submittedAt       DateTime?
+  responseData      Json? // Medicare response
+  medicareReference String?   @db.VarChar(50)
+  errorMessage      String?   @db.Text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@index([tenantId, claimNumber])
+  @@map("mbs_claim_submissions")
+}
+
+// === AU: MBS Items Directory ===
+
+model MbsItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  itemNumber  String   @db.VarChar(20)
+  description String   @db.VarChar(500)
+  itemType    String   @db.VarChar(50) // CONSULTATION, PROCEDURE, etc.
+  scheduleFee Decimal  @db.Decimal(12, 2)
+  benefitAmt  Decimal  @db.Decimal(12, 2)
+  isClaimable Boolean  @default(true)
+  rules       Json     @default("[]") // claim rules
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([itemNumber])
+  @@index([itemType])
+  @@map("mbs_items")
+}
+
+// === AU: PBS Prescriptions ===
+
+model PbsPrescription {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenantId              String    @db.Uuid
+  patientId             String    @db.Uuid
+  staffId               String    @db.Uuid
+  pbsCode               String    @db.VarChar(20)
+  medicationName        String    @db.VarChar(300)
+  strength              String    @db.VarChar(100)
+  quantity              Int
+  repeats               Int       @default(0)
+  category              String    @db.VarChar(50) // GENERAL, CONCESSIONAL, SAFETY_NET
+  safetyNetEntitlement  Boolean   @default(false)
+  concessionCardNumber  String?   @db.VarChar(50)
+  authorityPrescription Boolean   @default(false)
+  authorityNumber       String?   @db.VarChar(50)
+  streamlinedAuthority  Boolean   @default(false)
+  specialContributions  Boolean   @default(false)
+  status                String    @default("DRAFT") @db.VarChar(50)
+  submittedAt           DateTime?
+  pharmacyId            String?   @db.Uuid
+  errorMessage          String?   @db.Text
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  tenant  Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient     @relation(fields: [patientId], references: [id])
+  staff   StaffMember @relation(fields: [staffId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@map("pbs_prescriptions")
+}
+
+// === AU: My Health Record Documents ===
+
+model MyHealthRecordDocument {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientId       String    @db.Uuid
+  documentType    String    @db.VarChar(50) // SHARED_HEALTH_SUMMARY, EVENT_SUMMARY, etc.
+  clinicalDocId   String    @db.VarChar(100)
+  title           String    @db.VarChar(200)
+  description     String?   @db.Text
+  authoredAt      DateTime
+  status          String    @db.VarChar(50)
+  ihiNumber       String    @db.VarChar(16) // Individual Healthcare Identifier
+  source          String    @db.VarChar(100)
+  documentPayload Json? // CDA document payload
+  uploadedToMhr   Boolean   @default(false)
+  uploadedAt      DateTime?
+  mhrDocumentId   String?   @db.VarChar(100)
+  errorMessage    String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@map("my_health_record_documents")
+}
+
+// === AU: AIR (Australian Immunisation Register) Submissions ===
+
+model AirRecordSubmission {
+  id                   String    @id @default(uuid()) @db.Uuid
+  tenantId             String    @db.Uuid
+  patientId            String    @db.Uuid
+  vaccineName          String    @db.VarChar(200)
+  airVaccineCode       String    @db.VarChar(20)
+  administrationDate   DateTime  @db.Date
+  doseNumber           Int
+  lotNumber            String    @db.VarChar(50)
+  manufacturer         String    @db.VarChar(200)
+  administeringStaffId String    @db.Uuid
+  status               String    @default("PENDING") @db.VarChar(50) // RECORDED, PENDING, ERROR, DUPLICATE
+  airReference         String?   @db.VarChar(50)
+  errorMessage         String?   @db.Text
+  submittedAt          DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@map("air_record_submissions")
+}
+
+// === AU: PIP (Practice Incentives Program) Reports ===
+
+model PipReport {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenantId       String   @db.Uuid
+  reportPeriod   String   @db.VarChar(20) // e.g. "2026-Q1"
+  reportType     String   @db.VarChar(50) // e.g. "QUALITY_IMPROVEMENT"
+  indicators     Json     @default("[]") // PipIndicator[]
+  totalIncentive Decimal  @default(0) @db.Decimal(12, 2)
+  generatedAt    DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, reportPeriod])
+  @@map("pip_reports")
+}
+
+// === NZ: MOH Claim Submissions ===
+
+model NzClaimSubmission {
+  id               String    @id @default(uuid()) @db.Uuid
+  tenantId         String    @db.Uuid
+  patientId        String    @db.Uuid
+  claimType        String    @db.VarChar(50) // GP_VISIT, ACC_INJURY, etc.
+  claimNumber      String    @db.VarChar(50)
+  serviceDate      DateTime  @db.Date
+  items            Json      @default("[]") // NzClaimItem[]
+  totalAmount      Decimal   @db.Decimal(12, 2)
+  subsidyAmount    Decimal   @db.Decimal(12, 2)
+  patientCoPay     Decimal   @db.Decimal(12, 2)
+  submissionMethod String    @db.VarChar(50)
+  status           String    @default("DRAFT") @db.VarChar(50)
+  phoOrgId         String?   @db.VarChar(100)
+  submittedAt      DateTime?
+  responseData     Json?
+  errorMessage     String?   @db.Text
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@map("nz_claim_submissions")
+}
+
+// === NZ: PHO Reports ===
+
+model PhoReport {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @db.Uuid
+  phoOrgId         String   @db.VarChar(100)
+  reportPeriod     String   @db.VarChar(20)
+  reportType       String   @db.VarChar(50) // CAPITATION, FFS, PERFORMANCE
+  enrolledPatients Int      @default(0)
+  capitationAmt    Decimal  @default(0) @db.Decimal(14, 2)
+  ffsAmount        Decimal  @default(0) @db.Decimal(14, 2)
+  totalAmount      Decimal  @default(0) @db.Decimal(14, 2)
+  breakdown        Json     @default("{}")
+  generatedAt      DateTime @default(now())
+  createdAt        DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, reportPeriod])
+  @@index([tenantId, phoOrgId])
+  @@map("pho_reports")
+}
+
+// === NZ: Immunisation Submissions (CIR) ===
+
+model NzImmunisationSubmission {
+  id                   String    @id @default(uuid()) @db.Uuid
+  tenantId             String    @db.Uuid
+  patientId            String    @db.Uuid
+  nhiNumber            String    @db.VarChar(10)
+  vaccineName          String    @db.VarChar(200)
+  vaccineCode          String    @db.VarChar(20)
+  administrationDate   DateTime  @db.Date
+  doseNumber           Int
+  lotNumber            String    @db.VarChar(50)
+  manufacturer         String    @db.VarChar(200)
+  administeringStaffId String    @db.Uuid
+  facilityCode         String?   @db.VarChar(20)
+  funded               Boolean   @default(true)
+  scheduleStatus       String    @db.VarChar(50) // DUE, OVERDUE, COMPLETED
+  status               String    @default("PENDING") @db.VarChar(50)
+  cirReference         String?   @db.VarChar(50)
+  errorMessage         String?   @db.Text
+  submittedAt          DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, nhiNumber])
+  @@map("nz_immunisation_submissions")
+}
+
+// === NZ: NHI Validation Log ===
+
+model NhiValidationLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @db.Uuid
+  patientId    String?  @db.Uuid
+  nhiNumber    String   @db.VarChar(10)
+  requestData  Json     @default("{}")
+  responseData Json? // NHI validation response
+  isValid      Boolean  @default(false)
+  matchStatus  String   @db.VarChar(50) // ACTIVE, DECEASED, EXPIRED, NOT_FOUND
+  matchedName  String?  @db.VarChar(200)
+  validatedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, nhiNumber])
+  @@map("nhi_validation_logs")
+}
+
+// === UK: GP2GP Record Transfers ===
+
+model UkGp2GpTransfer {
+  id                 String    @id @default(uuid()) @db.Uuid
+  tenantId           String    @db.Uuid
+  patientId          String    @db.Uuid
+  direction          String    @db.VarChar(20) // INCOMING, OUTGOING
+  transferId         String    @unique @db.VarChar(100)
+  requestingPractice String    @db.VarChar(10) // ODS code
+  sendingPractice    String    @db.VarChar(10) // ODS code
+  patientNhsNumber   String    @db.VarChar(10)
+  status             String    @db.VarChar(50)
+  recordPayload      Json?
+  transferredAt      DateTime?
+  completedAt        DateTime?
+  errorMessage       String?   @db.Text
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientNhsNumber])
+  @@map("uk_gp2gp_transfers")
+}
+
+// === UK: QOF Reports ===
+
+model UkQofReport {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @db.Uuid
+  practiceOdsCode String   @db.VarChar(10)
+  reportPeriod    String   @db.VarChar(20)
+  indicatorGroups Json     @default("[]") // UkQofIndicatorGroup[]
+  totalPoints     Decimal  @default(0) @db.Decimal(12, 2)
+  totalAchieved   Decimal  @default(0) @db.Decimal(12, 2)
+  totalPayment    Decimal  @default(0) @db.Decimal(12, 2)
+  generatedAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, reportPeriod])
+  @@map("uk_qof_reports")
+}
+
+// === UK: GP Connect Interactions ===
+
+model UkGpConnectInteraction {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientId       String    @db.Uuid
+  interactionType String    @db.VarChar(50) // APPOINTMENT_BOOKING, RECORD_SHARING, CONSULTATION
+  gpConnectRef    String    @db.VarChar(100)
+  status          String    @db.VarChar(50)
+  requestPayload  Json?
+  responsePayload Json?
+  performedAt     DateTime?
+  errorMessage    String?   @db.Text
+  createdAt       DateTime  @default(now())
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, interactionType])
+  @@map("uk_gp_connect_interactions")
+}
+
+// === UK: Spine Interactions (PDS, SCR) ===
+
+model UkSpineInteraction {
+  id               String    @id @default(uuid()) @db.Uuid
+  tenantId         String    @db.Uuid
+  patientId        String    @db.Uuid
+  patientNhsNumber String    @db.VarChar(10)
+  interactionType  String    @db.VarChar(50) // PDS_LOOKUP, SCR_ACCESS, SCR_UPDATE
+  spineRef         String    @db.VarChar(100)
+  status           String    @db.VarChar(50)
+  requestPayload   Json?
+  responsePayload  Json?
+  performedAt      DateTime?
+  errorMessage     String?   @db.Text
+  createdAt        DateTime  @default(now())
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, interactionType])
+  @@map("uk_spine_interactions")
+}
+
+// === UK: EPS Prescriptions ===
+
+model UkEpsPrescription {
+  id                String    @id @default(uuid()) @db.Uuid
+  tenantId          String    @db.Uuid
+  prescriptionId    String    @db.Uuid
+  epsGuid           String    @unique @db.VarChar(100)
+  nominatedPharmacy String?   @db.VarChar(10) // ODS code
+  prescriptionType  String    @db.VarChar(50)
+  dosageText        String    @db.VarChar(500)
+  quantity          Int
+  numberOfRepeats   Int       @default(0)
+  status            String    @db.VarChar(50)
+  submittedAt       DateTime?
+  dispensedAt       DateTime?
+  lastDispensedDate DateTime?
+  cancelledAt       DateTime?
+  errorMessage      String?   @db.Text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@map("uk_eps_prescriptions")
+}
+
+// === CA: Provincial Claim Submissions ===
+
+model CaProvincialClaimSubmission {
+  id               String    @id @default(uuid()) @db.Uuid
+  tenantId         String    @db.Uuid
+  patientId        String    @db.Uuid
+  healthPlan       String    @db.VarChar(50) // OHIP, MSP, RAMQ, etc.
+  claimNumber      String    @db.VarChar(50)
+  serviceDate      DateTime  @db.Date
+  items            Json      @default("[]") // CaClaimItem[]
+  totalAmount      Decimal   @db.Decimal(12, 2)
+  paidAmount       Decimal   @default(0) @db.Decimal(12, 2)
+  submissionMethod String    @db.VarChar(50)
+  status           String    @default("DRAFT") @db.VarChar(50)
+  submittedAt      DateTime?
+  responseData     Json?
+  errorMessage     String?   @db.Text
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, healthPlan])
+  @@map("ca_provincial_claim_submissions")
+}
+
+// === CA: Drug Database (DIN) ===
+
+model CaDrugDatabase {
+  id                    String   @id @default(uuid()) @db.Uuid
+  din                   String   @unique @db.VarChar(8) // Drug Identification Number
+  brandName             String   @db.VarChar(300)
+  genericName           String?  @db.VarChar(300)
+  manufacturer          String   @db.VarChar(200)
+  strength              String   @db.VarChar(100)
+  form                  String   @db.VarChar(100)
+  route                 String?  @db.VarChar(100)
+  schedule              String   @db.VarChar(50)
+  status                String   @db.VarChar(50) // ACTIVE, DISCONTINUED, MARKETED, CANCELLED
+  provincialFormularies String[] @default([])
+  atcCode               String?  @db.VarChar(20)
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([brandName])
+  @@index([genericName])
+  @@index([status])
+  @@map("ca_drug_database")
+}
+
+// === CA: Immunisation Submissions (per province) ===
+
+model CaImmunisationSubmission {
+  id                   String    @id @default(uuid()) @db.Uuid
+  tenantId             String    @db.Uuid
+  patientId            String    @db.Uuid
+  provincialHealthCard String    @db.VarChar(20)
+  province             String    @db.VarChar(2)
+  vaccineName          String    @db.VarChar(200)
+  vaccineCode          String    @db.VarChar(20)
+  administrationDate   DateTime  @db.Date
+  doseNumber           Int
+  lotNumber            String    @db.VarChar(50)
+  manufacturer         String    @db.VarChar(200)
+  administeringStaffId String    @db.Uuid
+  status               String    @default("PENDING") @db.VarChar(50)
+  registryReference    String?   @db.VarChar(50)
+  errorMessage         String?   @db.Text
+  submittedAt          DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, province])
+  @@map("ca_immunisation_submissions")
+}
+
+// === CA: Canada Health Infoway Interactions ===
+
+model CaInfowayInteraction {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientId       String    @db.Uuid
+  interactionType String    @db.VarChar(50) // EHR_QUERY, DOCUMENT_SUBMIT, PATIENT_SUMMARY
+  infowayRef      String    @db.VarChar(100)
+  status          String    @db.VarChar(50)
+  requestPayload  Json?
+  responsePayload Json?
+  performedAt     DateTime?
+  errorMessage    String?   @db.Text
+  createdAt       DateTime  @default(now())
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, interactionType])
+  @@map("ca_infoway_interactions")
+}
+
+// ============================================================================
+// Phase 14: Business Intelligence & Advanced Operations
+// ============================================================================
+
+// ============================================================================
+// 14.1 — Advanced Analytics Models
+// ============================================================================
+
+// === Saved Reports (Custom Report Builder) ===
+
+enum ReportFormat {
+  TABLE
+  CHART
+  PIVOT
+  SUMMARY
+}
+
+enum ReportScheduleFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum ReportDeliveryMethod {
+  EMAIL
+  PRINT
+  DASHBOARD
+  EXPORT
+}
+
+model SavedReport {
+  id                String                   @id @default(uuid()) @db.Uuid
+  tenantId          String                   @db.Uuid
+  name              String                   @db.VarChar(200)
+  description       String?                  @db.Text
+  category          String                   @db.VarChar(100) // REVENUE, APPOINTMENTS, CLINICAL, OPERATIONS
+  reportConfig      Json // Full report configuration
+  format            ReportFormat             @default(TABLE)
+  isScheduled       Boolean                  @default(false)
+  scheduleFrequency ReportScheduleFrequency?
+  scheduleConfig    Json? // { dayOfWeek, dayOfMonth, time, timezone }
+  deliveryMethod    ReportDeliveryMethod?    @default(DASHBOARD)
+  recipients        String[] // User IDs or email addresses
+  lastRunAt         DateTime?
+  nextRunAt         DateTime?
+  createdBy         String                   @db.Uuid
+  isActive          Boolean                  @default(true)
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+
+  tenant             Tenant               @relation(fields: [tenantId], references: [id])
+  ReportExecutionLog ReportExecutionLog[]
+
+  @@index([tenantId, category])
+  @@index([tenantId, createdBy])
+  @@index([tenantId, isScheduled])
+  @@map("saved_reports")
+}
+
+// === Report Execution Log ===
+
+model ReportExecutionLog {
+  id            String    @id @default(uuid()) @db.Uuid
+  tenantId      String    @db.Uuid
+  reportId      String?   @db.Uuid
+  reportName    String    @db.VarChar(200)
+  executionType String    @db.VarChar(50) // MANUAL, SCHEDULED, ON_DEMAND
+  status        String    @db.VarChar(50) // RUNNING, COMPLETED, FAILED
+  resultSummary Json? // Row count, totals
+  outputFormat  String?   @db.VarChar(50) // CSV, JSON, PDF, HTML
+  outputUrl     String?   @db.VarChar(500)
+  errorMessage  String?   @db.Text
+  startedAt     DateTime  @default(now())
+  completedAt   DateTime?
+  durationMs    Int? // Execution time in milliseconds
+  createdBy     String    @db.Uuid
+  createdAt     DateTime  @default(now())
+
+  tenant Tenant       @relation(fields: [tenantId], references: [id])
+  report SavedReport? @relation(fields: [reportId], references: [id])
+
+  @@index([tenantId, reportId])
+  @@index([tenantId, startedAt])
+  @@map("report_execution_logs")
+}
+
+// === Revenue Analytics Snapshot (cached for dashboards) ===
+
+model RevenueAnalyticsSnapshot {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @db.Uuid
+  snapshotDate DateTime @default(now())
+  periodStart  DateTime @db.Date
+  periodEnd    DateTime @db.Date
+
+  // Revenue totals
+  totalRevenue     Decimal @default(0) @db.Decimal(14, 2)
+  totalBilled      Decimal @default(0) @db.Decimal(14, 2)
+  totalCollected   Decimal @default(0) @db.Decimal(14, 2)
+  totalAdjustments Decimal @default(0) @db.Decimal(14, 2)
+  totalRefunds     Decimal @default(0) @db.Decimal(14, 2)
+  netRevenue       Decimal @default(0) @db.Decimal(14, 2)
+
+  // Payer mix breakdown
+  payerMix         Json @default("[]") // [{payer, billed, collected, count}]
+  procedureRevenue Json @default("[]") // [{cptCode, description, revenue, count}]
+
+  // A/R data
+  totalAR           Decimal @default(0) @db.Decimal(14, 2)
+  arDaysOutstanding Decimal @default(0) @db.Decimal(10, 2)
+
+  // Collections
+  collectionRate   Decimal @default(0) @db.Decimal(5, 2) // Percentage
+  averageClaimAge  Int     @default(0) // Days
+  denialRate       Decimal @default(0) @db.Decimal(5, 2)
+  topDenialReasons Json    @default("[]")
+
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, periodStart, periodEnd])
+  @@map("revenue_analytics_snapshots")
+}
+
+// === Appointment Utilization Analytics ===
+
+model AppointmentUtilizationSnapshot {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @db.Uuid
+  snapshotDate DateTime @default(now())
+  periodStart  DateTime @db.Date
+  periodEnd    DateTime @db.Date
+
+  // Capacity & fill rates
+  totalSlots     Int     @default(0)
+  filledSlots    Int     @default(0)
+  fillRate       Decimal @default(0) @db.Decimal(5, 2) // Percentage
+  cancelledSlots Int     @default(0)
+  noShowSlots    Int     @default(0)
+
+  // Peak times analysis
+  peakTimes   Json @default("[]") // [{hour, dayOfWeek, count}]
+  byDayOfWeek Json @default("[]") // [{day, total, filled, cancelled, noShow}]
+  byStaff     Json @default("[]") // [{staffId, staffName, total, filled, rate}]
+  byType      Json @default("[]") // [{type, total, percentage}]
+
+  // No-show patterns
+  noShowRate      Decimal @default(0) @db.Decimal(5, 2)
+  noShowTrend     Json    @default("[]")
+  averageWaitTime Decimal @default(0) @db.Decimal(10, 2) // Minutes
+
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, periodStart, periodEnd])
+  @@map("appointment_utilization_snapshots")
+}
+
+// === Clinician Productivity Snapshot ===
+
+model ClinicianProductivitySnapshot {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @db.Uuid
+  staffId      String   @db.Uuid
+  snapshotDate DateTime @default(now())
+  periodStart  DateTime @db.Date
+  periodEnd    DateTime @db.Date
+
+  // Encounters
+  totalEncounters        Int     @default(0)
+  encountersPerDay       Decimal @default(0) @db.Decimal(8, 2)
+  newPatients            Int     @default(0)
+  followUpPatients       Int     @default(0)
+  telemedicineEncounters Int     @default(0)
+
+  // RVUs
+  totalRVUs        Decimal @default(0) @db.Decimal(10, 2)
+  rvusPerEncounter Decimal @default(0) @db.Decimal(8, 2)
+  rvusPerDay       Decimal @default(0) @db.Decimal(8, 2)
+
+  // Revenue
+  revenueGenerated    Decimal @default(0) @db.Decimal(14, 2)
+  revenuePerEncounter Decimal @default(0) @db.Decimal(10, 2)
+  revenuePerDay       Decimal @default(0) @db.Decimal(10, 2)
+
+  // Quality
+  patientSatisfaction Decimal? @db.Decimal(5, 2)
+  noShowRate          Decimal  @default(0) @db.Decimal(5, 2)
+  onTimeRate          Decimal  @default(0) @db.Decimal(5, 2)
+
+  createdAt DateTime @default(now())
+
+  tenant Tenant      @relation(fields: [tenantId], references: [id])
+  staff  StaffMember @relation(fields: [staffId], references: [id])
+
+  @@index([tenantId, staffId])
+  @@index([tenantId, periodStart, periodEnd])
+  @@map("clinician_productivity_snapshots")
+}
+
+// ============================================================================
+// 14.2 — Operational Tools
+// ============================================================================
+
+// === Patient Flow Board (Room Tracking) ===
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  CLEANING
+  MAINTENANCE
+  OUT_OF_SERVICE
+}
+
+model ClinicRoom {
+  id           String     @id @default(uuid()) @db.Uuid
+  tenantId     String     @db.Uuid
+  name         String     @db.VarChar(100) // e.g. "Room 101", "Consult Room A"
+  roomType     String     @db.VarChar(50) // EXAMINATION, CONSULTATION, PROCEDURE, TREATMENT, TRIAGE
+  status       RoomStatus @default(AVAILABLE)
+  floor        String?    @db.VarChar(50)
+  building     String?    @db.VarChar(100)
+  capacity     Int        @default(1)
+  equipment    String[] // Equipment tags
+  isAccessible Boolean    @default(true) // Wheelchair accessible
+  notes        String?    @db.Text
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  tenant           Tenant             @relation(fields: [tenantId], references: [id])
+  RoomOccupancyLog RoomOccupancyLog[]
+
+  @@index([tenantId, status])
+  @@map("clinic_rooms")
+}
+
+// === Room Occupancy Log (for patient flow tracking) ===
+
+model RoomOccupancyLog {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @db.Uuid
+  roomId          String    @db.Uuid
+  patientId       String?   @db.Uuid
+  appointmentId   String?   @db.Uuid
+  staffId         String?   @db.Uuid
+  checkInAt       DateTime  @default(now())
+  checkOutAt      DateTime?
+  status          String    @db.VarChar(50) // WAITING, IN_CONSULT, WITH_NURSE, PROCEDURE, CHECKOUT
+  durationMinutes Int?
+  notes           String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant Tenant     @relation(fields: [tenantId], references: [id])
+  room   ClinicRoom @relation(fields: [roomId], references: [id])
+
+  @@index([tenantId, roomId, status])
+  @@index([tenantId, checkInAt])
+  @@map("room_occupancy_logs")
+}
+
+// === Task Management ===
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+model Task {
+  id             String       @id @default(uuid()) @db.Uuid
+  tenantId       String       @db.Uuid
+  title          String       @db.VarChar(300)
+  description    String?      @db.Text
+  priority       TaskPriority @default(MEDIUM)
+  status         TaskStatus   @default(TODO)
+  category       String?      @db.VarChar(100) // ADMIN, CLINICAL, BILLING, LAB, STAFF
+  assignedToId   String?      @db.Uuid
+  assignedById   String       @db.Uuid
+  patientId      String?      @db.Uuid
+  dueDate        DateTime?
+  completedAt    DateTime?
+  completedById  String?      @db.Uuid
+  parentTaskId   String?      @db.Uuid
+  estimatedHours Decimal?     @db.Decimal(6, 2)
+  actualHours    Decimal?     @db.Decimal(6, 2)
+  notes          String?      @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+  assignedTo  StaffMember?  @relation(fields: [assignedToId], references: [id])
+  TaskComment TaskComment[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, assignedToId])
+  @@index([tenantId, priority])
+  @@index([tenantId, dueDate])
+  @@map("tasks")
+}
+
+// === Task Comments ===
+
+model TaskComment {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  taskId      String   @db.Uuid
+  userId      String   @db.Uuid
+  comment     String   @db.Text
+  attachments Json     @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  task   Task   @relation(fields: [taskId], references: [id])
+
+  @@index([tenantId, taskId])
+  @@map("task_comments")
+}
+
+// === Document Management System (Enhancement) ===
+
+model DocumentFolder {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenantId       String   @db.Uuid
+  name           String   @db.VarChar(200)
+  parentFolderId String?  @db.Uuid
+  description    String?  @db.Text
+  isSystem       Boolean  @default(false) // System-managed folder
+  createdBy      String   @db.Uuid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant       Tenant           @relation(fields: [tenantId], references: [id])
+  parentFolder DocumentFolder?  @relation("FolderHierarchy", fields: [parentFolderId], references: [id])
+  childFolders DocumentFolder[] @relation("FolderHierarchy")
+
+  @@unique([tenantId, name, parentFolderId])
+  @@index([tenantId, parentFolderId])
+  @@map("document_folders")
+}
+
+model DocumentTag {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @db.Uuid
+  name      String   @db.VarChar(100)
+  color     String?  @db.VarChar(7) // Hex color
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, name])
+  @@map("document_tags")
+}
+
+model DocumentVersion {
+  id            String   @id @default(uuid()) @db.Uuid
+  documentId    String   @db.Uuid
+  versionNumber Int
+  storageKey    String   @db.VarChar(500)
+  fileSize      Int
+  mimeType      String   @db.VarChar(100)
+  checksum      String?  @db.VarChar(64) // SHA-256
+  uploadedBy    String   @db.Uuid
+  changeNotes   String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id])
+
+  @@unique([documentId, versionNumber])
+  @@index([documentId])
+  @@map("document_versions")
+}
+
+// Add folder, tags, and version fields to existing Document table
+// These are added via migration to the existing Document model fields.
+
+// === Letter Generation Engine ===
+
+enum LetterStatus {
+  DRAFT
+  GENERATED
+  SENT
+  PRINTED
+  VOID
+}
+
+model LetterTemplate {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @db.Uuid
+  name            String   @db.VarChar(200)
+  description     String?  @db.Text
+  category        String   @db.VarChar(100) // REFERRAL, CERTIFICATE, CORRESPONDENCE, NOTICE
+  subjectTemplate String   @db.VarChar(500)
+  bodyTemplate    String   @db.Text // Handlebars/Mail-merge template
+  variables       String[] // Supported variables
+  format          String   @default("PDF") @db.VarChar(20) // PDF, DOCX, HTML
+  isActive        Boolean  @default(true)
+  createdBy       String   @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant          Tenant            @relation(fields: [tenantId], references: [id])
+  GeneratedLetter GeneratedLetter[]
+
+  @@index([tenantId, category])
+  @@map("letter_templates")
+}
+
+model GeneratedLetter {
+  id         String       @id @default(uuid()) @db.Uuid
+  tenantId   String       @db.Uuid
+  templateId String?      @db.Uuid
+  patientId  String       @db.Uuid
+  staffId    String?      @db.Uuid
+  title      String       @db.VarChar(500)
+  content    String       @db.Text // Rendered letter content
+  variables  Json         @default("{}") // Variables used with values
+  status     LetterStatus @default(DRAFT)
+  format     String       @default("PDF") @db.VarChar(20)
+  storageKey String?      @db.VarChar(500) // S3/MinIO key for generated file
+  sentVia    String?      @db.VarChar(50) // EMAIL, PRINT, PORTAL, MAIL
+  sentAt     DateTime?
+  sentTo     String?      @db.VarChar(500) // Email or address
+  printedAt  DateTime?
+  createdBy  String       @db.Uuid
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  tenant   Tenant          @relation(fields: [tenantId], references: [id])
+  template LetterTemplate? @relation(fields: [templateId], references: [id])
+  patient  Patient         @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@index([tenantId, createdAt])
+  @@map("generated_letters")
+}
+
+// ============================================================================
+// 14.3 — Inventory Management
+// ============================================================================
+
+// === Clinic Supply Inventory ===
+
+enum InventoryUnitType {
+  EACH
+  BOX
+  CASE
+  PACK
+  BOTTLE
+  TUBE
+  BAG
+  SET
+}
+
+model InventoryCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  name        String   @db.VarChar(200)
+  description String?  @db.Text
+  parentId    String?  @db.Uuid
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant        Tenant          @relation(fields: [tenantId], references: [id])
+  InventoryItem InventoryItem[]
+
+  @@unique([tenantId, name])
+  @@map("inventory_categories")
+}
+
+model InventoryItem {
+  id              String            @id @default(uuid()) @db.Uuid
+  tenantId        String            @db.Uuid
+  categoryId      String?           @db.Uuid
+  name            String            @db.VarChar(300)
+  sku             String            @db.VarChar(100)
+  description     String?           @db.Text
+  unitType        InventoryUnitType @default(EACH)
+  unitCost        Decimal           @default(0) @db.Decimal(10, 2)
+  unitPrice       Decimal           @default(0) @db.Decimal(10, 2)
+  currentStock    Int               @default(0)
+  minimumStock    Int               @default(0) // Reorder point
+  maximumStock    Int               @default(0)
+  reorderQuantity Int               @default(0)
+  location        String?           @db.VarChar(200) // Storage location
+  supplier        String?           @db.VarChar(200)
+  supplierSku     String?           @db.VarChar(100)
+  isActive        Boolean           @default(true)
+  isControlled    Boolean           @default(false)
+  requiresRx      Boolean           @default(false)
+  expiryDate      DateTime?         @db.Date
+  batchNumber     String?           @db.VarChar(100)
+  notes           String?           @db.Text
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  tenant               Tenant                 @relation(fields: [tenantId], references: [id])
+  category             InventoryCategory?     @relation(fields: [categoryId], references: [id])
+  InventoryTransaction InventoryTransaction[]
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, categoryId])
+  @@index([tenantId, name])
+  @@index([tenantId, currentStock])
+  @@map("inventory_items")
+}
+
+// === Inventory Transactions ===
+
+model InventoryTransaction {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @db.Uuid
+  itemId          String   @db.Uuid
+  transactionType String   @db.VarChar(50) // RECEIVED, USED, ADJUSTED, RETURNED, TRANSFERRED, WASTED
+  quantity        Int // Negative for usage, positive for receipt
+  previousStock   Int
+  newStock        Int
+  unitCost        Decimal  @default(0) @db.Decimal(10, 2)
+  totalCost       Decimal  @default(0) @db.Decimal(12, 2)
+  reference       String?  @db.VarChar(200) // PO number, usage reference
+  performedBy     String   @db.Uuid
+  patientId       String?  @db.Uuid
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now())
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id])
+  item   InventoryItem @relation(fields: [itemId], references: [id])
+
+  @@index([tenantId, itemId])
+  @@index([tenantId, transactionType])
+  @@index([tenantId, createdAt])
+  @@map("inventory_transactions")
+}
+
+// === Purchase Orders ===
+
+enum PurchaseOrderStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ORDERED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+model PurchaseOrder {
+  id           String              @id @default(uuid()) @db.Uuid
+  tenantId     String              @db.Uuid
+  poNumber     String              @db.VarChar(50)
+  supplier     String              @db.VarChar(200)
+  status       PurchaseOrderStatus @default(DRAFT)
+  items        Json                @default("[]") // [{itemId, sku, name, quantity, unitCost, totalCost, receivedQuantity}]
+  subtotal     Decimal             @default(0) @db.Decimal(12, 2)
+  tax          Decimal             @default(0) @db.Decimal(12, 2)
+  shippingCost Decimal             @default(0) @db.Decimal(12, 2)
+  totalCost    Decimal             @default(0) @db.Decimal(12, 2)
+  orderedAt    DateTime?
+  expectedDate DateTime?           @db.Date
+  receivedAt   DateTime?
+  notes        String?             @db.Text
+  createdBy    String              @db.Uuid
+  approvedBy   String?             @db.Uuid
+  approvedAt   DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, poNumber])
+  @@index([tenantId, status])
+  @@map("purchase_orders")
+}
+
+// === Vaccine Inventory ===
+
+enum VaccineStorageType {
+  REFRIGERATED // 2-8°C
+  FROZEN // -15°C or colder
+  ULTRA_FROZEN // -60°C to -80°C
+  AMBIENT
+}
+
+enum VaccineStatus {
+  IN_STOCK
+  IN_USE
+  EXPIRED
+  WASTED
+  TRANSFERRED
+}
+
+model VaccineInventory {
+  id                 String             @id @default(uuid()) @db.Uuid
+  tenantId           String             @db.Uuid
+  vaccineName        String             @db.VarChar(200)
+  cvxCode            String             @db.VarChar(10)
+  manufacturer       String             @db.VarChar(200)
+  lotNumber          String             @db.VarChar(100)
+  ndc                String?            @db.VarChar(50)
+  storageType        VaccineStorageType @default(REFRIGERATED)
+  status             VaccineStatus      @default(IN_STOCK)
+  quantityReceived   Int                @default(0)
+  quantityUsed       Int                @default(0)
+  quantityWasted     Int                @default(0)
+  quantityAvailable  Int                @default(0)
+  unitCost           Decimal            @default(0) @db.Decimal(10, 2)
+  receivedDate       DateTime           @db.Date
+  expiryDate         DateTime           @db.Date
+  manufacturerLotRef String?            @db.VarChar(200)
+
+  // Cold chain monitoring
+  temperatureLogs   Json      @default("[]") // [{timestamp, tempCelsius, deviceId, alert}]
+  lastTempCheck     DateTime?
+  lastTempReading   Decimal?  @db.Decimal(5, 2)
+  coldChainBreach   Boolean   @default(false)
+  coldChainBreachAt DateTime?
+
+  storageLocation String?  @db.VarChar(200)
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant                Tenant                  @relation(fields: [tenantId], references: [id])
+  VaccineAdministration VaccineAdministration[]
+
+  @@unique([tenantId, lotNumber, cvxCode])
+  @@index([tenantId, status])
+  @@index([tenantId, expiryDate])
+  @@map("vaccine_inventory")
+}
+
+// === Vaccine Administration Record (tied to existing Immunization model) ===
+
+model VaccineAdministration {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenantId              String   @db.Uuid
+  patientId             String   @db.Uuid
+  immunizationId        String   @db.Uuid
+  vaccineLotId          String   @db.Uuid
+  doseNumber            Int
+  siteOfAdministration  String?  @db.VarChar(100)
+  routeOfAdministration String?  @db.VarChar(100)
+  administeredBy        String   @db.Uuid
+  administeredAt        DateTime @default(now())
+  consentObtained       Boolean  @default(false)
+  adverseReaction       Boolean  @default(false)
+  adverseReactionNotes  String?  @db.Text
+  createdAt             DateTime @default(now())
+
+  tenant       Tenant           @relation(fields: [tenantId], references: [id])
+  patient      Patient          @relation(fields: [patientId], references: [id])
+  immunization Immunization     @relation(fields: [immunizationId], references: [id])
+  vaccineLot   VaccineInventory @relation(fields: [vaccineLotId], references: [id])
+
+  @@index([tenantId, vaccineLotId])
+  @@index([tenantId, administeredAt])
+  @@map("vaccine_administrations")
+}
+
+// === Medication Sample Tracking ===
+
+enum SampleStatus {
+  IN_STOCK
+  DISTRIBUTED
+  EXPIRED
+  RECALLED
+  DISCONTINUED
+}
+
+model MedicationSample {
+  id                String       @id @default(uuid()) @db.Uuid
+  tenantId          String       @db.Uuid
+  medicationName    String       @db.VarChar(300)
+  strength          String       @db.VarChar(100)
+  form              String       @db.VarChar(100)
+  manufacturer      String       @db.VarChar(200)
+  ndc               String?      @db.VarChar(50)
+  lotNumber         String       @db.VarChar(100)
+  quantityReceived  Int          @default(0)
+  quantityRemaining Int          @default(0)
+  status            SampleStatus @default(IN_STOCK)
+  expiryDate        DateTime     @db.Date
+  receivedDate      DateTime     @default(now())
+  storageLocation   String?      @db.VarChar(200)
+  notes             String?      @db.Text
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  tenant             Tenant               @relation(fields: [tenantId], references: [id])
+  SampleDistribution SampleDistribution[]
+
+  @@unique([tenantId, lotNumber, medicationName])
+  @@index([tenantId, status])
+  @@index([tenantId, expiryDate])
+  @@map("medication_samples")
+}
+
+// === Sample Distribution Log ===
+
+model SampleDistribution {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @db.Uuid
+  sampleId        String   @db.Uuid
+  patientId       String   @db.Uuid
+  staffId         String   @db.Uuid
+  quantity        Int
+  purpose         String?  @db.VarChar(500) // Reason for sample
+  prescriptionId  String?  @db.Uuid // Optional linked prescription
+  consentObtained Boolean  @default(false)
+  distributedAt   DateTime @default(now())
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now())
+
+  tenant  Tenant           @relation(fields: [tenantId], references: [id])
+  sample  MedicationSample @relation(fields: [sampleId], references: [id])
+  patient Patient          @relation(fields: [patientId], references: [id])
+  staff   StaffMember      @relation(fields: [staffId], references: [id])
+
+  @@index([tenantId, sampleId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, distributedAt])
+  @@map("sample_distributions")
+}
+
+// === Retail Product Sales (Point-of-Sale) ===
+
+enum PosPaymentMethod {
+  CASH
+  CARD
+  MOBILE_PAYMENT
+  INVOICE
+  CLINIC_ACCOUNT
+  OTHER
+}
+
+model RetailProduct {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @db.Uuid
+  name         String   @db.VarChar(300)
+  sku          String   @db.VarChar(100)
+  description  String?  @db.Text
+  category     String?  @db.VarChar(100)
+  unitPrice    Decimal  @db.Decimal(10, 2)
+  costPrice    Decimal  @default(0) @db.Decimal(10, 2)
+  taxRate      Decimal  @default(0) @db.Decimal(5, 3)
+  currentStock Int      @default(0)
+  minimumStock Int      @default(0)
+  isActive     Boolean  @default(true)
+  isTaxable    Boolean  @default(true)
+  barcode      String?  @db.VarChar(100)
+  imageUrl     String?  @db.VarChar(500)
+  notes        String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, category])
+  @@map("retail_products")
+}
+
+model PosSale {
+  id             String           @id @default(uuid()) @db.Uuid
+  tenantId       String           @db.Uuid
+  saleNumber     String           @unique @db.VarChar(50)
+  items          Json             @default("[]") // [{productId, sku, name, quantity, unitPrice, totalPrice, tax}]
+  subtotal       Decimal          @db.Decimal(12, 2)
+  taxTotal       Decimal          @default(0) @db.Decimal(12, 2)
+  discount       Decimal          @default(0) @db.Decimal(12, 2)
+  grandTotal     Decimal          @db.Decimal(12, 2)
+  paymentMethod  PosPaymentMethod
+  amountTendered Decimal          @db.Decimal(12, 2)
+  changeAmount   Decimal          @default(0) @db.Decimal(12, 2)
+  patientId      String?          @db.Uuid // Optional patient link
+  soldBy         String           @db.Uuid
+  notes          String?          @db.Text
+  soldAt         DateTime         @default(now())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id])
+  patient Patient? @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId, soldAt])
+  @@index([tenantId, paymentMethod])
+  @@map("pos_sales")
+}
+
+// ============================================================================
+// API Key Authentication (for external integrations: webhooks, FHIR clients)
+// ============================================================================
+
+model ApiKey {
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String    @db.Uuid
+  name        String    @db.VarChar(200)
+  keyHash     String    @unique @db.VarChar(64) // SHA-256 hex of the raw key
+  keyPrefix   String    @db.VarChar(8)          // First 8 chars shown in UI (tpt_xxxx)
+  scopes      String[]  @default([])             // e.g. ["fhir:read", "webhooks:write"]
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime?
+  lastUsedAt  DateTime?
+  createdBy   String    @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([keyHash])
+  @@map("api_keys")
+}
+
+// ============================================================================
+// EXTENSIONS: Row-Level Security (RLS) will be applied via migrations
+// ============================================================================
+// RLS Policy (applied in migration):
+// - Every row has tenantId
+// - Users can only see rows matching their tenant
+// - SUPER_ADMIN can see all tenants
