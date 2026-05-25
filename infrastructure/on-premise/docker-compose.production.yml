@@ -2,6 +2,16 @@
 # TPT Doctor — Production Docker Compose Stack (On-Premise)
 # For self-hosted deployments with full HIPAA controls
 # ============================================================================
+# 
+# IMPORTANT: This stack handles all technical HIPAA safeguards (encryption,
+# audit logging, access controls). You must still:
+# 1. Sign a BAA with your hosting provider (or manage physical security)
+# 2. Perform annual risk assessments and security training
+# 3. Establish breach notification procedures
+# 4. Review audit logs regularly
+# 
+# See docs/deployment/simple-vps.md for the full HIPAA compliance checklist.
+# 
 
 version: "3.9"
 

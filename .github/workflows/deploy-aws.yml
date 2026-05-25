@@ -1,0 +1,92 @@
+# ============================================================================
+# TPT Doctor — AWS CI/CD Deployment
+# ============================================================================
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  API_IMAGE: tpt-api
+  WEB_IMAGE: tpt-web
+  PORTAL_IMAGE: tpt-portal
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Type check
+        run: pnpm run typecheck
+
+      - name: Run tests
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker images
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-8)
+
+          # API
+          docker build -f apps/api/Dockerfile -t $ECR_REGISTRY/$API_IMAGE:latest -t $ECR_REGISTRY/$API_IMAGE:$SHORT_SHA .
+          docker push $ECR_REGISTRY/$API_IMAGE:latest
+          docker push $ECR_REGISTRY/$API_IMAGE:$SHORT_SHA
+
+          # Web App
+          docker build -f apps/web/Dockerfile -t $ECR_REGISTRY/$WEB_IMAGE:latest -t $ECR_REGISTRY/$WEB_IMAGE:$SHORT_SHA .
+          docker push $ECR_REGISTRY/$WEB_IMAGE:latest
+          docker push $ECR_REGISTRY/$WEB_IMAGE:$SHORT_SHA
+
+          # Patient Portal
+          docker build -f apps/patient-portal/Dockerfile -t $ECR_REGISTRY/$PORTAL_IMAGE:latest -t $ECR_REGISTRY/$PORTAL_IMAGE:$SHORT_SHA .
+          docker push $ECR_REGISTRY/$PORTAL_IMAGE:latest
+          docker push $ECR_REGISTRY/$PORTAL_IMAGE:$SHORT_SHA
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service --cluster tpt-doctor --service api --force-new-deployment
+          aws ecs update-service --cluster tpt-doctor --service web --force-new-deployment
+          aws ecs update-service --cluster tpt-doctor --service patient-portal --force-new-deployment
+
+      - name: Verify deployment
+        run: |
+          sleep 30
+          curl -f https://api.your-domain.com/api/v1/health || exit 1
